@@ -2,7 +2,7 @@
 #define tmsCommPatterns_h
 
 #include "tmsTestExample.h"
-#include "tmsTestExampleApp.h"
+#include "tmsAppTest-SimMSM.h"
 
 /* This Interface provides threads for tms Communications Patterns
    (tms Microgrid Standard section 4.9.2)

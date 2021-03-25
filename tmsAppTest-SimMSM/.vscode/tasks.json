@@ -22,9 +22,9 @@
             "problemMatcher": ["$gcc"]
         },
         {
-            "label": "Run tmsApp",
+            "label": "Run tmsAppTest-SimMSM",
             "type": "shell",
-            "command": "./objs/x64Darwin17Clang9.0/tmsTestExampleApp",
+            "command": "./objs/x64Darwin17Clang9.0/tmsAppTest-SimMSM",
             "dependsOn": [
                 "Build All"
             ],
@@ -35,9 +35,9 @@
             }
         },
         {
-            "label": "Build/Run tmsTestExampleApp",
+            "label": "Build/Run tmsAppTest-SimMSM",
             "type": "shell",
-            "command": "./objs/x64Darwin17Clang9.0/tmsTestExampleApp",
+            "command": "./objs/x64Darwin17Clang9.0/tmsAppTest-SimMSM",
             "dependsOn": [
                 "Build Clean",
                 "Build All"
@@ -49,9 +49,9 @@
             }
         },
         {
-            "label": "Build/Debug tmsTestExampleApp",
+            "label": "Build/Debug tmsAppTest-SimMSM",
             "type": "shell",
-            "command": "./objs/x64Darwin17Clang9.0/tmsTestExampleApp",
+            "command": "./objs/x64Darwin17Clang9.0/tmsAppTest-SimMSM",
             "dependsOn": [
                 "Build Clean",
                 "Build Debug"

@@ -76,7 +76,7 @@ LIBS = -L$(NDDSHOME)/lib/$(TARGET_ARCH) \
 SOURCES = $(SOURCE_DIR)tmsCommPatterns.cxx
 COMMONSOURCES = $(notdir $(SOURCES))
 
-EXEC          = tmsTestExampleApp
+EXEC          = tmsAppTest-SimMSM
 DIRECTORIES   = objs.dir objs/$(TARGET_ARCH).dir
 COMMONOBJS    = $(COMMONSOURCES:%.cxx=objs/$(TARGET_ARCH)/%.o)
 

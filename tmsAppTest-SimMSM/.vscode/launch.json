@@ -8,7 +8,7 @@
             "name": "g++ - Build and Debug Pub",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/objs/x64Darwin17clang9.0/tmsTestExampleApp",
+            "program": "${workspaceFolder}/objs/x64Darwin17clang9.0/tmsAppTest-SimMSM",
             "args": [],
             //"stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -16,20 +16,20 @@
             //"environment": [],
             //"externalConsole": false,
             //"MIMode": "lldb",
-            "preLaunchTask": "Build/Debug tmsTestExampleApp"
+            "preLaunchTask": "Build/Debug tmsAppTest-SimMSM"
         },
         {
             "name": "g++ - Build and Run Pub",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/objs/x64Darwin17clang9.0/tmsTestExampleApp",
+            "program": "${workspaceFolder}/objs/x64Darwin17clang9.0/tmsAppTest-SimMSM",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Build/Run tmsTestExampleApp"
+            "preLaunchTask": "Build/Run tmsAppTest-SimMSM"
         }
     ]
 }
