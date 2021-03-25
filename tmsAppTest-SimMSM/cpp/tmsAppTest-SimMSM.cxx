@@ -174,7 +174,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         goto tms_app__test_MSM_main_just_return;
     }
     
-    std::cout << "Successfully Created Tactical Microgrid Participant from the System Designer config file"
+    std::cout << "Successfully Created Tactical Microgrid TMS Simulation Participant from the System Designer config file"
      << std::endl << std::flush;
 
 
@@ -219,7 +219,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         << retcode << std::endl << std::flush;
 		goto tms_app_test_MSM_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::MicrogridMembershipOutcomeTopicReader" 
+    std::cout << "Successfully Found: TMS_Subscriber1::MicrogridMembershipRequestReader" 
     << std::endl << std::flush;   
 
     request_response_reader = DDSDynamicDataReader::narrow(
@@ -272,7 +272,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 		goto tms_app_test_MSM_main_end;
     } 
 
-    std::cout << "Successfully created: srequest_response_data topic w/request_response_writer" 
+    std::cout << "Successfully created: request_response_data topic w/request_response_writer" 
     << std::endl << std::flush;  
 
 	// Turn up threads - the Event threads do nothing but hang on events (no data)
