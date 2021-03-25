@@ -187,34 +187,34 @@ extern "C" int tms_app_main(int sample_count) {
     // To Do: create an array of writers w/data handles indexed by enum topic
     // and itterate getting writer handles - same with reader handles 
     heartbeat_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::HeartbeatTopicWriter"));
+        participant->lookup_datawriter_by_name("TMS_Publisher1::HeartbeatWriter"));
     if (heartbeat_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::HeartbeatTopicWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS_Publisher1::HeartbeatWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::HeartbeatTopicWriter" 
+    std::cout << "Successfully Found: TMS_Publisher1::HeartbeatWriter" 
     << std::endl << std::flush;
 
 	device_announcement_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::DeviceAnnouncementTopicWriter"));
+        participant->lookup_datawriter_by_name("TMS_Publisher1::DeviceAnnouncementWriter"));
     if (device_announcement_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::DeviceAnnouncementTopicWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS_Publisher1::DeviceAnnouncementWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::MicrogridDeviceAnnouncementTopicWriter" 
+    std::cout << "Successfully Found: TMS_Publisher1::MicrogridDeviceAnnouncementWriter" 
     << std::endl << std::flush;
 
     microgrid_membership_request_writer = DDSDynamicDataWriter::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-        participant->lookup_datawriter_by_name("TMS_Publisher1::MicrogridMembershipRequestTopicWriter"));
+        participant->lookup_datawriter_by_name("TMS_Publisher1::MicrogridMembershipRequestWriter"));
     if (microgrid_membership_request_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::MicrogridMembershipRequestTopicWriter lookup_datawriter_by_name error " 
+        std::cerr << "TMS_Publisher1::MicrogridMembershipRequestWriter lookup_datawriter_by_name error " 
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::MicrogridMembershipRequestTopicWriter" 
+    std::cout << "Successfully Found: TMS_Publisher1::MicrogridMembershipRequestWriter" 
     << std::endl << std::flush;
 
     source_transition_state_writer = DDSDynamicDataWriter::narrow(
@@ -239,13 +239,13 @@ extern "C" int tms_app_main(int sample_count) {
 
  	microgrid_membership_outcome_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::MicrogridMembershipOutcomeTopicReader")); 
+		participant->lookup_datareader_by_name("TMS_Subscriber1::MicrogridMembershipOutcomeReader")); 
     if (microgrid_membership_outcome_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::MicrogridMembershipOutcomeTopicReader"
+        std::cerr << "TMS_Subscriber1::MicrogridMembershipOutcomeReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::MicrogridMembershipOutcomeTopicReader" 
+    std::cout << "Successfully Found: TMS_Subscriber1::MicrogridMembershipOutcomeReader" 
     << std::endl << std::flush;   
 
     request_response_reader = DDSDynamicDataReader::narrow(
@@ -317,7 +317,7 @@ extern "C" int tms_app_main(int sample_count) {
 		goto tms_app_main_end;
     } 
 
-    std::cout << "Successfully created: srequest_response_data topic w/request_response_writer" 
+    std::cout << "Successfully created: request_response_data topic w/request_response_writer" 
     << std::endl << std::flush;  
 
 	// Turn up threads - the Event threads do nothing but hang on events (no data)
