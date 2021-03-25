@@ -1,0 +1,8 @@
+tmsApp/makefile~
+tmsApp/objs/x64Darwin17clang9.0/tmsCommPatterns.o
+tmsApp/objs/x64Darwin17clang9.0/tmsTestExampleApp
+tmsApp/objs/x64Darwin17clang9.0/tmsTestExampleApp.o
+tmsAppTest-SimMSM/makefile~
+tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsCommPatterns.o
+tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsTestExampleApp
+tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsTestExampleApp.o
