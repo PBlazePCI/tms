@@ -22,6 +22,7 @@ class ReaderThreadInfo {
         enum TOPICS_E topic_enum();
 
         DDSDynamicDataReader * reader;
+
     private:
         enum TOPICS_E myTopicEnum;
         bool echo_response; // used for received request topics

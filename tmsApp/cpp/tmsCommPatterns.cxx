@@ -25,10 +25,12 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 	DDSStatusCondition *status_condition =  NULL;
 	DDSReadCondition * read_condition = NULL;
 	DDSWaitSet *waitset = new DDSWaitSet();
-    DDS_ReturnCode_t retcode;
+    DDS_ReturnCode_t retcode, retcode1;
     DDSConditionSeq active_conditions_seq;
 	DDS_DynamicDataSeq data_seq;
 	DDS_SampleInfoSeq info_seq;
+    tms_SampleId tms_sample_id; // use microgrid def from model tmsTestExample.h
+    DDS_UnsignedLong fingerprint_len = (DDS_UnsignedLong) tms_LEN_Fingerprint; // the get_octet_array requires this non-const
 
     std::cout << "Created Reader Pthread: " << myReaderThreadInfo->me() << " Topic" << std::endl;
 
@@ -102,12 +104,35 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 							data_seq, info_seq, DDS_LENGTH_UNLIMITED,
 							DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE, DDS_ANY_INSTANCE_STATE);
 				if (retcode == DDS_RETCODE_OK) {
+                    // we've got some data for what ever topic we recieved, figure that out, make an
+                    // internal variable change as a result (if that's the case) and respond accordingly 
+                    // (with a RequestResponse not an On Change Topic. On Change topics trigger from the 
+                    // main loop as you peruse through internal variables that you see have changed
 					for (int i = 0; i < data_seq.length(); ++i) {
 						if (info_seq[i].valid_data) {  
                             if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
-                            switch  (myReaderThreadInfo->topic_enum()) {
+
+                            // what topic did we receive -  i.e. what topic is associated with this thread
+                            switch  (myReaderThreadInfo->topic_enum()) {  
                                 case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: 
                                     std::cout << "Received Topic Membership Request (should check for MM_JOIN) " << std::endl;
+                                    // Get the SampleID and build and send RequestResponse here
+                                    retcode = data_seq[i].get_octet_array(\
+                                        tms_sample_id.deviceId,\
+                                         &fingerprint_len,\
+                                         "requestId.deviceId",\
+                                         DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED\
+                                         );
+                                    retcode1 = data_seq[i].get_ulonglong(\
+                                        tms_sample_id.sequenceNumber,\
+                                        "requestId.sequenceNumber",\
+                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
+                                    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK) {
+                                        std::cout << "Reader Thread: get_data error\n" << std::endl;
+                                        goto end_reader_thread;
+                                    }
+
+
                                     break;
                                 default: 
                                     std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
@@ -398,7 +423,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                     switch (myOnChangeWriterThreadInfo->topic_enum()) {
                     
                         case  tms_TOPIC_HEARTBEAT_ENUM: 
-                            // get sequence number for display
+                            // Example code where I make heartbeat an On Change writer vs Periodic - get sequence number for display
                             DDS_UnsignedLong mySeqNum; // sequence is set/incremented in main loop where the condit trigger is set
                             retcode = myOnChangeWriterThreadInfo->changeStateData-> \
                                 get_ulong(mySeqNum, "sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
