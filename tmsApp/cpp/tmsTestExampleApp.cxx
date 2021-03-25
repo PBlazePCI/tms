@@ -177,7 +177,7 @@ extern "C" int tms_app_main(int sample_count) {
     if (participant == NULL) {
         std::cerr << "create_participant_from_config error " << std::endl << std::flush;
         participant_shutdown(participant);
-        return tms_app_main_just_return;
+        goto tms_app_main_just_return;
     }
     
     std::cout << "Successfully Created Tactical Microgrid Participant from the System Designer config file"
