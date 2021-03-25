@@ -19,7 +19,7 @@
 #include "ndds/ndds_cpp.h"
 #include <pthread.h>
 #include "tmsTestExample.h" // This file was created by rticodegen from the official TMS datamodel
-#include "tmsAppTest-SimMSM.h"
+#include "tmsTestExampleApp.h" // Use the common app header vs. "tmsAppTest-SimMSM.h"
 #include "tmsCommPatterns.h"
 
 // Local prototypes

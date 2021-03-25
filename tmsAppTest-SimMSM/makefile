@@ -28,6 +28,8 @@ NDDSHOME := "/Applications/rti_connext_dds-6.0.1"
 endif
 
 SOURCE_DIR = ./cpp/
+# use the common code from the actual app directory
+COMMON_SOURCE_DIR = ../tmsApp/cpp/
 
 TARGET_ARCH = x64Darwin17clang9.0
 
@@ -65,7 +67,7 @@ endif
 
 
 
-INCLUDES = -I. -I./cpp -I$(NDDSHOME)/include -I$(NDDSHOME)/include/ndds 
+INCLUDES = -I. -I./cpp -I../tmsApp/cpp -I$(NDDSHOME)/include -I$(NDDSHOME)/include/ndds 
        
 LIBS = -L$(NDDSHOME)/lib/$(TARGET_ARCH) \
         \
@@ -73,7 +75,7 @@ LIBS = -L$(NDDSHOME)/lib/$(TARGET_ARCH) \
         -lnddscpp$(SHAREDLIB_SFX)$(DEBUG_SFX) -lnddsc$(SHAREDLIB_SFX)$(DEBUG_SFX) -lnddscore$(SHAREDLIB_SFX)$(DEBUG_SFX) \
         $(SYSLIBS)
 
-SOURCES = $(SOURCE_DIR)tmsCommPatterns.cxx
+SOURCES = $(COMMON_SOURCE_DIR)tmsCommPatterns.cxx
 COMMONSOURCES = $(notdir $(SOURCES))
 
 EXEC          = tmsAppTest-SimMSM
@@ -90,9 +92,11 @@ $(TARGET_ARCH) : $(DIRECTORIES) $(COMMONOBJS) \
 objs/$(TARGET_ARCH)/% : objs/$(TARGET_ARCH)/%.o
 	$(LINKER) $(LINKER_FLAGS)   -o $@ $@.o $(COMMONOBJS) $(LIBS)
 
-objs/$(TARGET_ARCH)/%.o : $(SOURCE_DIR)%.cxx  
+objs/$(TARGET_ARCH)/%.o : $(SOURCE_DIR)%.cxx 
 	$(COMPILER) $(COMPILER_FLAGS)  -o $@ $(DEFINES) $(INCLUDES) -c $<
 
+objs/$(TARGET_ARCH)/%.o : $(COMMON_SOURCE_DIR)%.cxx 
+	$(COMPILER) $(COMPILER_FLAGS)  -o $@ $(DEFINES) $(INCLUDES) -c $<
 #
 # Uncomment these lines if you want the support files regenerated when idl
 # file is modified
