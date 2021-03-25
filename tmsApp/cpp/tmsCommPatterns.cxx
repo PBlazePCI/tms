@@ -103,17 +103,17 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 							DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE, DDS_ANY_INSTANCE_STATE);
 				if (retcode == DDS_RETCODE_OK) {
 					for (int i = 0; i < data_seq.length(); ++i) {
-						if (info_seq[i].valid_data) {                  
-							//retcode=data_seq[i].get_ulong(myTopicInfo.field1, 
-									//"Field1Name", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
-							if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
-							//retcode=data_seq[i].get_ulong(myTopicInfo.field2,
-									//"Field2Name", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
-							if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
-							//std::cout << myWaitsetInfo->me() << " Field1" 
-                            //<< myTopicInfo.field1  
-                            //<< " Field2 " << myTopicInfo.field2
-                            //<< std::endl;
+						if (info_seq[i].valid_data) {  
+                            if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
+                            switch  (myReaderThreadInfo->topic_enum()) {
+                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: 
+                                    std::cout << "Received Topic Membership Request (should check for MM_JOIN) " << std::endl;
+                                    break;
+                                default: 
+                                    std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
+                                    break;
+                            }              
+						
 						}
 					}
 				} else if (retcode == DDS_RETCODE_NO_DATA) {

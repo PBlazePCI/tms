@@ -6,3 +6,5 @@ tmsAppTest-SimMSM/makefile~
 tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsCommPatterns.o
 tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsTestExampleApp
 tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsTestExampleApp.o
+tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsAppTest-SimMSM.o
+tmsAppTest-SimMSM/objs/x64Darwin17clang9.0/tmsAppTest-SimMSM
