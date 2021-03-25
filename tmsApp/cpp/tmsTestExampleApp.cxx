@@ -177,7 +177,7 @@ extern "C" int tms_app_main(int sample_count) {
     if (participant == NULL) {
         std::cerr << "create_participant_from_config error " << std::endl << std::flush;
         participant_shutdown(participant);
-        return -1;
+        return tms_app_main_just_return;
     }
     
     std::cout << "Successfully Created Tactical Microgrid Participant from the System Designer config file"
@@ -307,7 +307,7 @@ extern "C" int tms_app_main(int sample_count) {
 		goto tms_app_main_end;
     } 
 
-    std::cout << "Successfully created: source_transition_state_data topic w/microgrid_membership_request writer" 
+    std::cout << "Successfully created: source_transition_state_data topic w/state_transition_state writer" 
     << std::endl << std::flush;  
 
     request_response_data = request_response_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
@@ -340,7 +340,7 @@ extern "C" int tms_app_main(int sample_count) {
     
     myOnChangeWriterSourceTransitionStateThreadInfo->writer = source_transition_state_writer;
     myOnChangeWriterSourceTransitionStateThreadInfo->enabled=true; // enable topic to be published
-    myOnChangeWriterSourceTransitionStateThreadInfo->changeStateData=heartbeat_data; 
+    myOnChangeWriterSourceTransitionStateThreadInfo->changeStateData=source_transition_state_data; 
     pthread_t wstc_tid; // writer device_announcement tid
     pthread_create(&wstc_tid, NULL, pthreadOnChangeWriter, (void*) myOnChangeWriterSourceTransitionStateThreadInfo);
 
@@ -371,7 +371,7 @@ extern "C" int tms_app_main(int sample_count) {
     NDDSUtility::sleep(send_period); // wait a second for thread initialization to complete printing (printing is not sychronized)
 
 
-    /* Pushblish one-time topics here - QoS is likely keep last, with durability set to transient-local to allow late joiners
+    /* Publish one-time topics here - QoS is likely keep last, with durability set to transient-local to allow late joiners
        to get these announcements
     */
     std::cout <<  std::endl << tms_TOPIC_DEVICE_ANNOUNCEMENT << ": " << this_device_id << std::endl;
@@ -449,7 +449,7 @@ extern "C" int tms_app_main(int sample_count) {
     pthread_cancel(wrr_tid);
     pthread_cancel(rstr_tid);
 
-
+    tms_app_main_just_return:
     return participant_shutdown(participant);
 }
 

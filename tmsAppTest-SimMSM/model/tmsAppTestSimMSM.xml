@@ -1005,8 +1005,14 @@
     <domain_participant_library name="TMS_ParticipantLibrary1">
       <domain_participant name="TMS_Participant1" domain_ref="TMS_DomainLibrary1::TMS_Domain0">
         <publisher name="TMS_Publisher1">
+          <data_writer name="MicrogridMembershipOutcomeWriter" topic_ref="MicrogridMembershipOutcome"/>
+          <data_writer name="RequestResponseWriter" topic_ref="RequestResponse"/>
+          <data_writer name="SourceTransitionRequestWriter" topic_ref="SourceTransitionRequest"/>
         </publisher>
         <subscriber name="TMS_Subscriber1">
+          <data_reader name="MicrogridMembershipRequestReader" topic_ref="MicrogridMembershipRequest"/>
+          <data_reader name="SourceTransitionStateReader" topic_ref="SourceTransitionState"/>
+          <data_reader name="RequestResponseReader" topic_ref="RequestResponse"/>
         </subscriber>
       </domain_participant>
     </domain_participant_library>
