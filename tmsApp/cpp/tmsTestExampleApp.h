@@ -5,7 +5,14 @@
 
 
 static bool run_flag = true;
+
+// should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
 static unsigned long long sequence_number=0; // ever monotonically increasing for each request sent
+
+// Variable associated with Source Transition Request - note the TMS topic struct holds both present and future state
+// so we should be able to leverage the state within the topic
+static enum tms_SourceTransition internal_source_transition_state = ST_UNINITIALIZED; 
+static enum tms_SourceTransition external_tms_source_transition_state = ST_UNINITIALIZED; 
 
 // Should probably intialize this_device_id in a loop since setting an array size tms_LEN_Fingerprint
 // to a "fixed string 32 chars + null" defeats the purpose of using tms_LEN_Fingerprint - but eventually

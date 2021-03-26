@@ -17,12 +17,16 @@ class ReaderThreadInfo {
     // C'tor has Echo Response flag to handle Rcv'd Command Requests and all
     // Response 
     public:
-        ReaderThreadInfo(enum TOPICS_E topicEnum, bool echoResponse = false);
+        ReaderThreadInfo(enum TOPICS_E topicEnum, bool echoResponse = false); 
         std::string me();
         enum TOPICS_E topic_enum();
+        bool echoReqResponse();
 
         DDSDynamicDataReader * reader;
 
+        // if echoResponse set true this writer will be used to echo the response
+        DDSDynamicDataWriter * reqRspWriter;
+        
     private:
         enum TOPICS_E myTopicEnum;
         bool echo_response; // used for received request topics

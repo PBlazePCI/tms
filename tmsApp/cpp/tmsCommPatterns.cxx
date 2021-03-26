@@ -14,7 +14,10 @@ ReaderThreadInfo::ReaderThreadInfo(enum TOPICS_E topicEnum, bool echoResponse)
         {
             myTopicEnum = topicEnum;
             echo_response = echoResponse; // default not to echo a response (rcv'd type not a request) 
+            reqRspWriter = NULL;  // initialize to NULL and perform a checks if the user requres an echoResponse
         }
+
+bool    ReaderThreadInfo::echoReqResponse() { return echo_response; }
 
 std::string ReaderThreadInfo::me(){ return topic_name_array[myTopicEnum]; }
 enum TOPICS_E ReaderThreadInfo::topic_enum() { return myTopicEnum; };
@@ -31,9 +34,26 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 	DDS_SampleInfoSeq info_seq;
     tms_SampleId tms_sample_id; // use microgrid def from model tmsTestExample.h
     DDS_UnsignedLong fingerprint_len = (DDS_UnsignedLong) tms_LEN_Fingerprint; // the get_octet_array requires this non-const
+    DDS_DynamicData * request_response_data = NULL;
 
     std::cout << "Created Reader Pthread: " << myReaderThreadInfo->me() << " Topic" << std::endl;
 
+
+    if (myReaderThreadInfo->echoReqResponse()) {  // If response enabled, create the writer
+        if (myReaderThreadInfo->reqRspWriter == NULL) {
+            std::cerr << "Reader thread: Response enabled, but no writer assigned"  << std::endl;
+            goto end_reader_thread;
+        }
+    
+        // create a data sample - do I need to dispose this if I use a different key each time?
+        request_response_data = myReaderThreadInfo->reqRspWriter->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
+        if (request_response_data == NULL) {
+            std::cerr << "Reader thread: request_response_data: create_data error"
+            << retcode << std::endl << std::flush;
+            goto end_reader_thread;
+        }
+    }
+    
     // Create read condition
     read_condition = myReaderThreadInfo->reader->create_readcondition(
         DDS_NOT_READ_SAMPLE_STATE,
@@ -107,15 +127,17 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                     // we've got some data for what ever topic we recieved, figure that out, make an
                     // internal variable change as a result (if that's the case) and respond accordingly 
                     // (with a RequestResponse not an On Change Topic. On Change topics trigger from the 
-                    // main loop as you peruse through internal variables that you see have changed
+                    // main loop as you peruse through internal variables that you see have changed as a
+                    // result of a request or other internal event.
 					for (int i = 0; i < data_seq.length(); ++i) {
 						if (info_seq[i].valid_data) {  
                             if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
 
                             // what topic did we receive -  i.e. what topic is associated with this thread
                             switch  (myReaderThreadInfo->topic_enum()) {  
-                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: 
+                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: // MSM Sim receives this from Device
                                     std::cout << "Received Topic Membership Request (should check for MM_JOIN) " << std::endl;
+                                    // Send the Request Response here while we have context of the request
                                     // Get the SampleID and build and send RequestResponse here
                                     retcode = data_seq[i].get_octet_array(\
                                         tms_sample_id.deviceId,\
@@ -131,7 +153,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                         std::cout << "Reader Thread: get_data error\n" << std::endl;
                                         goto end_reader_thread;
                                     }
-
+                                    //myReaderThreadInfo->reqRspData->
 
                                     break;
                                 default: 

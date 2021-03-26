@@ -22,6 +22,8 @@
 #include "tmsTestExampleApp.h"
 #include "tmsCommPatterns.h"
 
+#define ECHO_RQST_RESPONSE true
+
 // Local prototypes
 void handle_SIGINT(int unused);
 int tms_app_main (unsigned int);
@@ -144,7 +146,7 @@ extern "C" int tms_app_main(int sample_count) {
     DDS_DynamicData * heartbeat_data = NULL;
     DDS_DynamicData * source_transition_state_data = NULL;
     DDS_DynamicData * request_response_data = NULL;
-    DDS_ReturnCode_t retcode, retcode1, retcode2;  // compound retcodes to do one check
+    DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3;  // compound retcodes to do one check
 
      
     // DDSGuardCondition heartbeatStateChangeCondit;  // example of publishing a periodic as a change state.
@@ -165,7 +167,7 @@ extern "C" int tms_app_main(int sample_count) {
     OnChangeWriterThreadInfo * myOnChangeWriterSourceTransitionStateThreadInfo = new OnChangeWriterThreadInfo(tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM, &sourceTransitionStateChangeCondit);
     ReaderThreadInfo * myMicrogridMembershipOutcomeReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM);
     ReaderThreadInfo * myRequestResponseReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_REQUEST_RESPONSE_ENUM);
-    ReaderThreadInfo * mySourceTransitionRequestReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM);
+    ReaderThreadInfo * mySourceTransitionRequestReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM, ECHO_RQST_RESPONSE);
 
     /* To customize participant QoS, use 
     the configuration file USER_QOS_PROFILES.xml */
@@ -310,12 +312,14 @@ extern "C" int tms_app_main(int sample_count) {
     std::cout << "Successfully created: source_transition_state_data topic w/state_transition_state writer" 
     << std::endl << std::flush;  
 
+    /*
     request_response_data = request_response_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
     if (request_response_data == NULL) {
         std::cerr << "request_response_data: create_data error"
         << retcode << std::endl << std::flush;
 		goto tms_app_main_end;
     } 
+    */
 
     std::cout << "Successfully created: request_response_data topic w/request_response_writer" 
     << std::endl << std::flush;  
@@ -357,6 +361,7 @@ extern "C" int tms_app_main(int sample_count) {
     pthread_create(&rmmo_tid, NULL, pthreadToProcReaderEvents, (void*) myMicrogridMembershipOutcomeReaderThreadInfo);
 
     mySourceTransitionRequestReaderThreadInfo->reader = source_transition_request_reader;
+    mySourceTransitionRequestReaderThreadInfo->reqRspWriter = request_response_writer;
     pthread_t rstr_tid; // Reader Source Transition Request tid
     pthread_create(&rstr_tid, NULL, pthreadToProcReaderEvents, (void*) mySourceTransitionRequestReaderThreadInfo);
 
@@ -392,13 +397,13 @@ extern "C" int tms_app_main(int sample_count) {
 
     // configure a request to join microgrid  - once configured - update the requestId.sequenceNumber and issue via the write below at will (not durable)
     retcode = microgrid_membership_request_data->set_octet_array("requestId.deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
-    retcode = microgrid_membership_request_data->\
+    retcode1 = microgrid_membership_request_data->\
         set_ulonglong("requestId.sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_UnsignedLongLong)\
         reqSeqNo->getNextSeqNo(tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM)); 
-    retcode1 = microgrid_membership_request_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
+    retcode2 = microgrid_membership_request_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
     // note enums are compiler dependent and here seem to be 4 bytes long (the compiler will tell you- and you can always printf sizeof(MM_JOIN))
-    retcode2 = microgrid_membership_request_data->set_long("membership", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MM_JOIN);
-    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK) {
+    retcode3 = microgrid_membership_request_data->set_long("membership", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MM_JOIN);
+    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode3 != DDS_RETCODE_OK) {
         std::cerr << "microgrid_membership_request: Dynamic Data Set Error" << std::endl << std::flush;
         goto tms_app_main_end;
     }

@@ -21,6 +21,7 @@
 #include "tmsTestExample.h" // This file was created by rticodegen from the official TMS datamodel
 #include "tmsTestExampleApp.h" // Use the common app header vs. "tmsAppTest-SimMSM.h"
 #include "tmsCommPatterns.h"
+#define ECHO_RQST_RESPONSE true
 
 // Local prototypes
 void handle_SIGINT(int unused);
@@ -157,7 +158,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         new OnChangeWriterThreadInfo (tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM, &sourceTransitionRequestChangeCondit);
     WriterEventsThreadInfo * myRequestResponseEventThreadInfo = new WriterEventsThreadInfo(tms_TOPIC_REQUEST_RESPONSE_ENUM);
     WriterEventsThreadInfo * mySourceTransitionRequestEventThreadInfo = new WriterEventsThreadInfo(tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM);
-    ReaderThreadInfo * myMicrogridMembershipRequestReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM);
+    ReaderThreadInfo * myMicrogridMembershipRequestReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM, ECHO_RQST_RESPONSE);
     ReaderThreadInfo * myRequestResponseReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_REQUEST_RESPONSE_ENUM);
     ReaderThreadInfo * mySourceTransitionStateReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM);
 
@@ -265,13 +266,15 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     std::cout << "Successfully created: source_transition_request_data topic w/source_transition_request writer" 
     << std::endl << std::flush;  
 
+    /*
     request_response_data = request_response_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
     if (request_response_data == NULL) {
         std::cerr << "request_response_data: create_data error"
         << retcode << std::endl << std::flush;
 		goto tms_app_test_MSM_main_end;
     } 
-
+    */
+   
     std::cout << "Successfully created: request_response_data topic w/request_response_writer" 
     << std::endl << std::flush;  
 
@@ -293,6 +296,8 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     pthread_create(&wstr_tid, NULL, pthreadToProcWriterEvents, (void*) mySourceTransitionRequestEventThreadInfo);
 
     myMicrogridMembershipRequestReaderThreadInfo->reader = microgrid_membership_request_reader;
+    // this topic when received, requires a RequestResponse - so pass in the writer.
+    myMicrogridMembershipRequestReaderThreadInfo->reqRspWriter = request_response_writer;
     pthread_t rmmo_tid; // Reader microgrid_membership_outcome tid
     pthread_create(&rmmo_tid, NULL, pthreadToProcReaderEvents, (void*) myMicrogridMembershipRequestReaderThreadInfo);
 
