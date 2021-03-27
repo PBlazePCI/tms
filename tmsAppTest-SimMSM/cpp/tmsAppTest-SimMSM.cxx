@@ -274,7 +274,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 		goto tms_app_test_MSM_main_end;
     } 
     */
-   
+
     std::cout << "Successfully created: request_response_data topic w/request_response_writer" 
     << std::endl << std::flush;  
 
@@ -331,7 +331,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     // get approval to enter the grid
     retcode = microgrid_membership_outcome_writer->write(* microgrid_membership_outcome_data, DDS_HANDLE_NIL);
     if (retcode != DDS_RETCODE_OK) {
-        std::cerr << "product_info: Dynamic Data Set Error " << std::endl << std::flush;
+        std::cerr << "microgrid_membership_request: Wrtie Error " << std::endl << std::flush;
         goto tms_app_test_MSM_main_end;
     }
 

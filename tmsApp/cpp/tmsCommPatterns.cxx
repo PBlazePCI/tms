@@ -28,7 +28,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 	DDSStatusCondition *status_condition =  NULL;
 	DDSReadCondition * read_condition = NULL;
 	DDSWaitSet *waitset = new DDSWaitSet();
-    DDS_ReturnCode_t retcode, retcode1;
+    DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3;
     DDSConditionSeq active_conditions_seq;
 	DDS_DynamicDataSeq data_seq;
 	DDS_SampleInfoSeq info_seq;
@@ -39,7 +39,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
     std::cout << "Created Reader Pthread: " << myReaderThreadInfo->me() << " Topic" << std::endl;
 
 
-    if (myReaderThreadInfo->echoReqResponse()) {  // If response enabled, create the writer
+    if (myReaderThreadInfo->echoReqResponse()) {  // If response enabled, create the writer data
         if (myReaderThreadInfo->reqRspWriter == NULL) {
             std::cerr << "Reader thread: Response enabled, but no writer assigned"  << std::endl;
             goto end_reader_thread;
@@ -136,25 +136,64 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                             // what topic did we receive -  i.e. what topic is associated with this thread
                             switch  (myReaderThreadInfo->topic_enum()) {  
                                 case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: // MSM Sim receives this from Device
-                                    std::cout << "Received Topic Membership Request (should check for MM_JOIN) " << std::endl;
+                                    if (!myReaderThreadInfo->echoReqResponse()) {   // this topic requires and Response
+                                        std::cerr << "tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST resquires Response" << std::endl << std::flush;
+                                        goto end_reader_thread;
+                                    }
+                                    std::cout << "Received Topic Membership Request (should check for MM_JOIN/LEAVE) " << std::endl;
+                                    
                                     // Send the Request Response here while we have context of the request
                                     // Get the SampleID and build and send RequestResponse here
-                                    retcode = data_seq[i].get_octet_array(\
-                                        tms_sample_id.deviceId,\
-                                         &fingerprint_len,\
-                                         "requestId.deviceId",\
-                                         DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED\
+                                    retcode = data_seq[i].get_octet_array(
+                                        tms_sample_id.deviceId,
+                                         &fingerprint_len,
+                                         "requestId.deviceId",
+                                         DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED
                                          );
-                                    retcode1 = data_seq[i].get_ulonglong(\
-                                        tms_sample_id.sequenceNumber,\
-                                        "requestId.sequenceNumber",\
+                                    retcode1 = data_seq[i].get_ulonglong(
+                                        tms_sample_id.sequenceNumber,
+                                        "requestId.sequenceNumber",
                                         DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
                                     if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK) {
                                         std::cout << "Reader Thread: get_data error\n" << std::endl;
                                         goto end_reader_thread;
                                     }
-                                    //myReaderThreadInfo->reqRspData->
 
+                                    // At this point we've verified a required response and writer is valid
+                                    // so send it!
+                                    retcode = request_response_data->set_octet_array(
+                                        "relatedRequestId.deviceId", 
+                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                        tms_LEN_Fingerprint, 
+                                        (const DDS_Octet *)&tms_sample_id.deviceId
+                                        );
+                                    retcode1 = request_response_data->set_ulonglong(
+                                        "relatedRequestId.sequenceNumber",
+                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                        tms_sample_id.sequenceNumber
+                                        );
+                                    retcode2 = request_response_data->set_ulong(
+                                        "status.code",
+                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                        tms_REPLY_OK
+                                        );
+                                    retcode3 = request_response_data->set_string(
+                                        "status.reason",
+                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                        "Hello World"
+                                        );
+                                    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode3 != DDS_RETCODE_OK) {
+                                        std::cout << "Reader Thread: set_data error\n" << std::endl;
+                                        goto end_reader_thread;
+                                    }
+                                    myReaderThreadInfo->reqRspWriter->write(* request_response_data, DDS_HANDLE_NIL);
+                                    if (retcode != DDS_RETCODE_OK) {
+                                        std::cerr << "Reader Thread: RequestResponce Membership request write Error " << std::endl << std::flush;
+                                        goto end_reader_thread;
+                                    }
+                                    break;
+                                case  tms_TOPIC_REQUEST_RESPONSE_ENUM:
+                                    std::cout << "Received Request Response Topic" << std::endl;
                                     break;
                                 default: 
                                     std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
