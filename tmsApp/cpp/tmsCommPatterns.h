@@ -2,7 +2,22 @@
 #define tmsCommPatterns_h
 
 #include "tmsTestExample.h"
-#include "tmsTestExampleApp.h"
+#include "tmsCommon.h"
+
+extern bool run_flag;
+
+// should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
+extern unsigned long long sequence_number; // ever monotonically increasing for each request sent
+
+// Variable associated with Source Transition Request - note the TMS topic struct holds both present and future state
+// so we should be able to leverage the state within the topic
+// Also a real MSM would need to keep these in arrays for the maximum number of devices allowed on a Microgrid
+extern enum tms_MicrogridMembershipResult internal_membership_result;
+extern enum tms_MicrogridMembershipResult external_tms_membership_result;  
+extern enum tms_SourceTransition internal_source_transition_state; 
+extern enum tms_SourceTransition external_tms_source_transition_state; 
+
+extern const char topic_name_array[tms_TOPIC_LAST_SENTINEL_ENUM][tms_MAXLEN_TopicName];
 
 /* This Interface provides threads for tms Communications Patterns
    (tms Microgrid Standard section 4.9.2)

@@ -18,11 +18,85 @@
 
 #include "ndds/ndds_cpp.h"
 #include <pthread.h>
+#include "tmsCommon.h"
 #include "tmsTestExample.h" // This file was created by rticodegen from the official TMS datamodel
-#include "tmsTestExampleApp.h"
 #include "tmsCommPatterns.h"
 
 #define ECHO_RQST_RESPONSE true
+
+bool run_flag = true;
+
+// should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
+unsigned long long sequence_number=0; // ever monotonically increasing for each request sent
+
+// Variable associated with Source Transition Request - note the TMS topic struct holds both present and future state
+// so we should be able to leverage the state within the topic
+// Also a real MSM would need to keep these in arrays for the maximum number of devices allowed on a Microgrid
+enum tms_MicrogridMembershipResult internal_membership_result = MMR_UNINITIALIZED;
+enum tms_MicrogridMembershipResult external_tms_membership_result = MMR_UNINITIALIZED;  
+enum tms_SourceTransition internal_source_transition_state = ST_UNINITIALIZED; 
+enum tms_SourceTransition external_tms_source_transition_state = ST_UNINITIALIZED; 
+
+// To Do - make this an array of pointers to static const DDS_Char * const and deprecate
+// the #define .
+const char topic_name_array [tms_TOPIC_LAST_SENTINEL_ENUM][tms_MAXLEN_TopicName] = {
+    tms_TOPIC_ACTIVE_DIAGNOSTICS_NAME,
+    tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_NAME,
+    tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_REQUEST_NAME,
+    tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_RESPONSE_NAME,
+    tms_TOPIC_CONFIG_RESERVATION_STATE_NAME,
+    tms_TOPIC_COPY_CONFIG_REQUEST_NAME,
+    tms_TOPIC_DC_DEVICE_POWER_MEASUREMENT_LIST_NAME,
+    tms_TOPIC_DC_LOAD_SHARING_REQUEST_NAME,
+    tms_TOPIC_DC_LOAD_SHARING_STATUS_NAME,
+    tms_TOPIC_DEVICE_ANNOUNCEMENT_NAME,
+    tms_TOPIC_DEVICE_CLOCK_STATUS_NAME,
+    tms_TOPIC_DEVICE_GROUNDING_NAME,
+    tms_TOPIC_DEVICE_GROUNDING_STATUS_NAME,
+    tms_TOPIC_DEVICE_PARAMETER_REQUEST_NAME,
+    tms_TOPIC_DEVICE_PARAMETER_STATUS_NAME,
+    tms_TOPIC_DEVICE_POWER_MEASUREMENT_LIST_NAME,
+    tms_TOPIC_DEVICE_POWER_PORT_LIST_NAME,
+    tms_TOPIC_DEVICE_POWER_STATUS_LIST_NAME,
+    tms_TOPIC_DISCOVERED_CONNECTION_LIST_NAME,
+    tms_TOPIC_ENGINE_STATE_NAME,
+    tms_TOPIC_FINGERPRINT_NICKNAME_NAME,
+    tms_TOPIC_FINGERPRINT_NICKNAME_REQUEST_NAME,
+    tms_TOPIC_GET_CONFIG_CONTENTS_REQUEST_NAME,
+    tms_TOPIC_GET_CONFIG_DC_LOAD_SHARING_RESPONSE_NAME,
+    tms_TOPIC_GET_CONFIG_DEVICE_PARAMETER_RESPONSE_NAME,
+    tms_TOPIC_GET_CONFIG_GROUNDING_CIRCUIT_RESPONSE_NAME,
+    tms_TOPIC_GET_CONFIG_LOAD_SHARING_RESPONSE_NAME,
+    tms_TOPIC_GET_CONFIG_POWER_SWITCH_RESPONSE_NAME,
+    tms_TOPIC_GET_CONFIG_SOURCE_TRANSITION_RESPONSE_NAME,
+    tms_TOPIC_GET_CONFIG_STORAGE_CONTROL_RESPONSE_NAME,
+    tms_TOPIC_GROUNDING_CIRCUIT_REQUEST_NAME,
+    tms_TOPIC_HEARTBEAT_NAME,
+    tms_TOPIC_LOAD_SHARING_REQUEST_NAME,
+    tms_TOPIC_LOAD_SHARING_STATUS_NAME,
+    tms_TOPIC_MICROGRID_CONNECTION_LIST_NAME,
+    tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME,
+    tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_NAME,
+    tms_TOPIC_OPERATOR_CONNECTION_LIST_NAME,
+    tms_TOPIC_OPERATOR_INTENT_REQUEST_NAME,
+    tms_TOPIC_OPERATOR_INTENT_STATE_NAME,
+    tms_TOPIC_POWER_SWITCH_REQUEST_NAME,
+    tms_TOPIC_RELEASE_CONFIG_REQUEST_NAME,
+    tms_TOPIC_REQUEST_RESPONSE_NAME,
+    tms_TOPIC_RESERVE_CONFIG_REPLY_NAME,
+    tms_TOPIC_RESERVE_CONFIG_REQUEST_NAME,
+    tms_TOPIC_SOURCE_TRANSITION_REQUEST_NAME,
+    tms_TOPIC_SOURCE_TRANSITION_STATE_NAME,
+    tms_TOPIC_STANDARD_CONFIG_MASTER_NAME,
+    tms_TOPIC_STORAGE_CONTROL_STATUS_NAME,
+    tms_TOPIC_STORAGE_INFO_NAME,
+    tms_TOPIC_STORAGE_STATE_NAME
+};
+
+// Should probably intialize this_device_id in a loop since setting an array size tms_LEN_Fingerprint
+// to a "fixed string 32 chars + null" defeats the purpose of using tms_LEN_Fingerprint - but eventually
+// it would be populated via a CAN device ID access 
+static char this_device_id [tms_LEN_Fingerprint+1] = "00000000000000000000000000001234";  
 
 // Local prototypes
 void handle_SIGINT(int unused);
