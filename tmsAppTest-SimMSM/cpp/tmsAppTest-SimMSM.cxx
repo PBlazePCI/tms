@@ -334,19 +334,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     } 
 
     std::cout << "Successfully created: source_transition_request_data topic w/source_transition_request writer" 
-    << std::endl << std::flush;  
-
-    /*
-    request_response_data = request_response_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
-    if (request_response_data == NULL) {
-        std::cerr << "request_response_data: create_data error"
-        << retcode << std::endl << std::flush;
-		goto tms_app_test_MSM_main_end;
-    } 
-    */
-
-    std::cout << "Successfully created: request_response_data topic w/request_response_writer" 
-    << std::endl << std::flush;  
+    << std::endl << std::flush;   
 
 	// Turn up threads - the Event threads do nothing but hang on events (no data)
     // Like to put the following in an itterator creating all the pthreads but the 
@@ -418,14 +406,6 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
             break;
         } 
         }
-        /*
-        // Demo only - normally change value in statement prior to trigger - but heartbeat is also running periodically
-        retcode = heartbeatStateChangeCondit.set_trigger_value(DDS_BOOLEAN_TRUE);
-        if (retcode != DDS_RETCODE_OK) {
-            std::cerr << "Main Heartbeat: set_trigger condition error\n" << std::endl << std::flush;
-            break;
-        }
-        */
 
         NDDSUtility::sleep(send_period);  // remove eventually 
 
