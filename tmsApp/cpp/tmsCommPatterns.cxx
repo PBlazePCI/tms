@@ -191,6 +191,11 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                         std::cerr << "Reader Thread: RequestResponce Membership request write Error " << std::endl << std::flush;
                                         goto end_reader_thread;
                                     }
+                                    // if we responded tms_REPLY_OK then we should set the internal variable as MMR_COMPLETE
+                                    // the mail_loop of the MSM should now see a difference between the internal state and the tms_state 
+                                    // causing an On Change tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME to get triggered
+                                    internal_membership_result = MMR_COMPLETE;
+                                    std::cout << "Membership Result Set: " << internal_membership_result << " ext: " << external_tms_membership_result << std::endl;
                                     break;
                                 case  tms_TOPIC_REQUEST_RESPONSE_ENUM:
                                     std::cout << "Received Request Response Topic" << std::endl;
@@ -499,6 +504,19 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                             retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
                             if (retcode != DDS_RETCODE_OK) {
                                 printf("On Change writer thread: set_enabled_guard error\n");
+                                goto end_on_change_thread;
+                            }
+                            break;
+
+                        case  tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM:
+
+                            std::cout << "On Change writer thread - tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME " <<  mySeqNum << std::endl;
+
+                            myOnChangeWriterThreadInfo->writer->write(* myOnChangeWriterThreadInfo->changeStateData, DDS_HANDLE_NIL);
+                            // Need to set this false after processing - else it just retriggers immediately
+                            retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
+                            if (retcode != DDS_RETCODE_OK) {
+                                printf("On Change writer thread tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME: set_enabled_guard error\n");
                                 goto end_on_change_thread;
                             }
                             break;

@@ -141,11 +141,11 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     DDS_DynamicData * microgrid_membership_outcome_data = NULL;
     DDS_DynamicData * source_transition_request_data = NULL;
     DDS_DynamicData * request_response_data = NULL;
-    DDS_ReturnCode_t retcode, retcode1, retcode2;  // compound retcodes to do one check
+    DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3, retcode4;  // compound retcodes to do one check
 
      
     // DDSGuardCondition heartbeatStateChangeCondit;  // example of publishing a periodic as a change state.
-    DDSGuardCondition sourceTransitionRequestChangeCondit;
+    DDSGuardCondition microgridMembershipOutcomeCondit;
 
     unsigned long long count = 0;  
     DDS_Duration_t send_period = {1,0};
@@ -155,7 +155,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 
     // Declare Reader and Writer thread Information structs
 	OnChangeWriterThreadInfo * myOnChangeMicrogridMembershipOutcomeThreadInfo = \
-        new OnChangeWriterThreadInfo (tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM, &sourceTransitionRequestChangeCondit);
+        new OnChangeWriterThreadInfo (tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM, &microgridMembershipOutcomeCondit);
     WriterEventsThreadInfo * myRequestResponseEventThreadInfo = new WriterEventsThreadInfo(tms_TOPIC_REQUEST_RESPONSE_ENUM);
     WriterEventsThreadInfo * mySourceTransitionRequestEventThreadInfo = new WriterEventsThreadInfo(tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM);
     ReaderThreadInfo * myMicrogridMembershipRequestReaderThreadInfo = new ReaderThreadInfo(tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM, ECHO_RQST_RESPONSE);
@@ -313,27 +313,23 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     NDDSUtility::sleep(send_period); // wait a second for thread initialization to complete printing (printing is not sychronized)
 
 
-    // configure a request to join microgrid  - once configured - update the requestId.sequenceNumber and issue via the write below at will (not durable)
+    // Preconfigure outcome topic (MicrogridMembershipApproval), in a real MSM you'd keep a database (array) of requesting devices and state
+    // Putting the MSM id in the requestId and the approved device relatedRequestId in the deviceId
     retcode = microgrid_membership_outcome_data->set_octet_array("requestId.deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
-    retcode = microgrid_membership_outcome_data->\
+    retcode1 = microgrid_membership_outcome_data->\
         set_ulonglong("requestId.sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_UnsignedLongLong)\
         reqSeqNo->getNextSeqNo(tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM)); 
-    retcode1 = microgrid_membership_outcome_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
-    // note enums are compiler dependent and here seem to be 4 bytes long (the compiler will tell you- and you can always printf sizeof(MM_JOIN))
-    retcode2 = microgrid_membership_outcome_data->set_long("membership", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MM_JOIN);
-    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK) {
-        std::cerr << "microgrid_membership_request: Dynamic Data Set Error" << std::endl << std::flush;
+    retcode2 = microgrid_membership_outcome_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
+    // note enums are compiler dependent and here seem to be 4 bytes long (the compiler will tell you- and you can always printf sizeof(MMR_COMPLETE))
+    retcode3 = microgrid_membership_outcome_data->set_long("membership", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MM_JOIN);
+    retcode4 = microgrid_membership_outcome_data->set_long("result", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MMR_COMPLETE);
+    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK) {
+        std::cerr << "microgrid_membership_outcome: Dynamic Data Set Error" << std::endl << std::flush;
         goto tms_app_test_MSM_main_end;
     }
  
     NDDSUtility::sleep(send_period); // Optional - to let periodic writer go first
 
-    // get approval to enter the grid
-    retcode = microgrid_membership_outcome_writer->write(* microgrid_membership_outcome_data, DDS_HANDLE_NIL);
-    if (retcode != DDS_RETCODE_OK) {
-        std::cerr << "microgrid_membership_request: Wrtie Error " << std::endl << std::flush;
-        goto tms_app_test_MSM_main_end;
-    }
 
     /* Main loop */
     while (run_flag) {
@@ -342,6 +338,18 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         // Do your stuff here to interact CAN to DDS (i.e. get devices state and
         // load DDS topics, set change triggers etc.)
     
+        // check for any internal variables that have changed that are associated
+        // with the On Change Topic triggers
+        std::cout << "Membership Result Int: " << internal_membership_result << " Ext: " << external_tms_membership_result << std::endl;
+        if (internal_membership_result != external_tms_membership_result) {
+            std::cout << "Main membership resultchange" << std::endl;
+            external_tms_membership_result=internal_membership_result;
+            retcode = microgridMembershipOutcomeCondit.set_trigger_value(DDS_BOOLEAN_TRUE);
+            if (retcode != DDS_RETCODE_OK) {
+                std::cerr << "Main membership outcome: set_trigger condition error\n" << std::endl << std::flush;
+            break;
+        } 
+        }
         /*
         // Demo only - normally change value in statement prior to trigger - but heartbeat is also running periodically
         retcode = heartbeatStateChangeCondit.set_trigger_value(DDS_BOOLEAN_TRUE);

@@ -11,8 +11,12 @@ static unsigned long long sequence_number=0; // ever monotonically increasing fo
 
 // Variable associated with Source Transition Request - note the TMS topic struct holds both present and future state
 // so we should be able to leverage the state within the topic
+// Also a real MSM would need to keep these in arrays for the maximum number of devices allowed on a Microgrid
+static enum tms_MicrogridMembershipResult internal_membership_result = MMR_UNINITIALIZED;
+static enum tms_MicrogridMembershipResult external_tms_membership_result = MMR_UNINITIALIZED;  
 static enum tms_SourceTransition internal_source_transition_state = ST_UNINITIALIZED; 
 static enum tms_SourceTransition external_tms_source_transition_state = ST_UNINITIALIZED; 
+
 
 // Should probably intialize this_device_id in a loop since setting an array size tms_LEN_Fingerprint
 // to a "fixed string 32 chars + null" defeats the purpose of using tms_LEN_Fingerprint - but eventually
