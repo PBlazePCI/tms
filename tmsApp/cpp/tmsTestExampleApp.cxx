@@ -197,7 +197,7 @@ static int participant_shutdown(
 
     retcode = DDSDomainParticipantFactory::finalize_instance();
     if (retcode != DDS_RETCODE_OK) {
-        fprintf(stderr, "finalize_instance error %d\n", retcode);
+        std::cerr <<  "Finalize_instance error " << retcode << std::endl; 
         status = -1;
     }
     */

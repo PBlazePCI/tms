@@ -60,45 +60,45 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
         DDS_ANY_VIEW_STATE,
         DDS_ANY_INSTANCE_STATE);
     if (read_condition == NULL) {
-        printf("Reader thread: create_readcondition error\n");
+        std::cerr << "Reader thread: create_readcondition error" << std::endl;
 		goto end_reader_thread;
     }
 
     //  Get status conditions
     status_condition = myReaderThreadInfo->reader->get_statuscondition();
     if (status_condition == NULL) {
-        printf("Reader thread: get_statuscondition error\n");
+        std::cerr << "Reader thread: get_statuscondition error" << std::endl;
  		goto end_reader_thread;
     }
 
     // Set enabled statuses
     retcode = status_condition->set_enabled_statuses(DDS_SUBSCRIPTION_MATCHED_STATUS);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Reader thread: set_enabled_statuses error\n");
+        std::cerr << "Reader thread: set_enabled_statuses error" << std::endl;
  		goto end_reader_thread;
     }   
 
     /* Attach Read Conditions */
     retcode = waitset->attach_condition(read_condition);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Reader thread: attach_condition error\n");
+        std::cerr << "Reader thread: attach_condition error" << std::endl;
 		goto end_reader_thread;
     }
 
     /* Attach Status Conditions */
     retcode = waitset->attach_condition(status_condition);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Reader thread: attach_condition error\n");
+        std::cerr << "Reader thread: attach_condition error" << std::endl;
 		goto end_reader_thread;
     }
 
 	while (run_flag) {
        	retcode = waitset->wait(active_conditions_seq, DDS_DURATION_INFINITE);
         if (retcode == DDS_RETCODE_TIMEOUT) {
-            printf("Reader thread: Wait timed out!! No conditions were triggered.\n");
+            std::cerr << "Reader thread: Wait timed out!! No conditions were triggered" << std::endl;
             continue;
         } else if (retcode != DDS_RETCODE_OK) {
-            printf("Reader thread:  wait returned error: %d\n", retcode);
+            std::cerr << "Reader thread:  wait returned error: " << retcode << std::endl; 
             goto end_reader_thread;
         }
 
@@ -137,10 +137,10 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                             switch  (myReaderThreadInfo->topic_enum()) {  
                                 case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: // MSM Sim receives this from Device
                                     if (!myReaderThreadInfo->echoReqResponse()) {   // this topic requires and Response
-                                        std::cerr << "tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST resquires Response" << std::endl << std::flush;
+                                        std::cerr << tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_NAME <<  "resquires Response" << std::endl << std::flush;
                                         goto end_reader_thread;
                                     }
-                                    std::cout << "Received Topic Membership Request (should check for MM_JOIN/LEAVE) " << std::endl;
+                                    std::cout << tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_NAME << " (should check for MM_JOIN/LEAVE) " << std::endl;
                                     
                                     // Send the Request Response here while we have context of the request
                                     // Get the SampleID and build and send RequestResponse here
@@ -155,7 +155,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                         "requestId.sequenceNumber",
                                         DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
                                     if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK) {
-                                        std::cout << "Reader Thread: get_data error\n" << std::endl;
+                                        std::cout << "Reader Thread: get_data error" << std::endl;
                                         goto end_reader_thread;
                                     }
 
@@ -188,20 +188,18 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                     }
                                     myReaderThreadInfo->reqRspWriter->write(* request_response_data, DDS_HANDLE_NIL);
                                     if (retcode != DDS_RETCODE_OK) {
-                                        std::cerr << "Reader Thread: RequestResponce Membership request write Error " << std::endl << std::flush;
+                                        std::cerr << "Reader Thread: " << tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME << " write Error " << std::endl << std::flush;
                                         goto end_reader_thread;
                                     }
                                     // if we responded tms_REPLY_OK then we should set the internal variable as MMR_COMPLETE
                                     // the mail_loop of the MSM should now see a difference between the internal state and the tms_state 
                                     // causing an On Change tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME to get triggered
                                     internal_membership_result = MMR_COMPLETE;
-                                    std::cout << "Membership Result Set: " << internal_membership_result << " ext: " << external_tms_membership_result << std::endl;
-                                    break;
                                 case  tms_TOPIC_REQUEST_RESPONSE_ENUM:
-                                    std::cout << "Received Request Response Topic" << std::endl;
+                                    std::cout << "Recieved" << tms_TOPIC_REQUEST_RESPONSE_NAME << std::endl;
                                     break;
                                 case  tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM: // Device receives from MSM
-                                    std::cout << "Received tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME" << std::endl;
+                                    std::cout << "Received " << tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME << std::endl;
                                     break;
                                 default: 
                                     std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
@@ -213,12 +211,12 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 				} else if (retcode == DDS_RETCODE_NO_DATA) {
 					continue;
 				} else {
-					fprintf(stderr, "Reader thread: read data error %d\n", retcode);
+					std::cerr << "Reader thread: read data error " << retcode << std::endl; 
 					goto end_reader_thread;
 				}
                 retcode = myReaderThreadInfo->reader->return_loan(data_seq, info_seq);
                 if (retcode != DDS_RETCODE_OK) {
-                    fprintf(stderr, "Reader thread:return_loan error %d\n", retcode);
+                    std::cerr << "Reader thread:return_loan error " << retcode << std::endl; 
                     goto end_reader_thread;
                 }  
 			}
@@ -251,7 +249,7 @@ void*  pthreadToProcWriterEvents(void  * writerEventsThreadInfo) {
     // Configure Waitset for Writer Status ****
     DDSStatusCondition *status_condition = myWriterEventsThreadInfo->writer->get_statuscondition();
     if (status_condition == NULL) {
-        printf("Writer thread: get_statuscondition error\n");
+        std::cerr << "Writer thread: get_statuscondition error " << retcode << std::endl; 
         goto end_writer_thread;
     }
 
@@ -259,14 +257,14 @@ void*  pthreadToProcWriterEvents(void  * writerEventsThreadInfo) {
     retcode = status_condition->set_enabled_statuses(
             DDS_PUBLICATION_MATCHED_STATUS);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Writer thread: set_enabled_statuses error\n");
+        std::cerr << "Writer thread: set_enabled_statuses error " << retcode << std::endl; 
         goto end_writer_thread;
     }
 
     // Attach Status Conditions to the above waitset
     retcode = waitset->attach_condition(status_condition);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Writer thread: attach_condition error\n");
+        std::cerr << "Writer thread: attach_condition error " << retcode << std::endl; 
         goto end_writer_thread;
     }
 
@@ -276,10 +274,10 @@ void*  pthreadToProcWriterEvents(void  * writerEventsThreadInfo) {
         retcode = waitset->wait(active_conditions_seq, DDS_DURATION_INFINITE);
         /* We get to timeout if no conditions were triggered */
         if (retcode == DDS_RETCODE_TIMEOUT) {
-            printf("Writer thread: Wait timed out!! No conditions were triggered.\n");
+            std::cerr << "Writer thread: Wait timed out!! No conditions were triggered" << std::endl;
             continue;
         } else if (retcode != DDS_RETCODE_OK) {
-            printf("Writer thread: wait returned error: %d\n", retcode);
+            std::cerr << "Writer thread: wait returned error " << retcode << std::endl;
             goto end_writer_thread;
         }
 
@@ -335,7 +333,7 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
     // Configure Waitset for Writer Status ****
     DDSStatusCondition *status_condition = myPeriodicPublishThreadInfo->writer->get_statuscondition();
     if (status_condition == NULL) {
-        printf("Writer thread: get_statuscondition error\n");
+        std::cerr << "Writer thread: get_statuscondition error" << std::endl;
         goto end_writer_thread;
     }
 
@@ -343,14 +341,14 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
     retcode = status_condition->set_enabled_statuses(
             DDS_PUBLICATION_MATCHED_STATUS);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Writer thread: set_enabled_statuses error\n");
+        std::cerr << "Writer thread: set_enabled_statuses error" << std::endl;
         goto end_writer_thread;
     }
 
     // Attach Status Conditions to the above waitset
     retcode = waitset->attach_condition(status_condition);
     if (retcode != DDS_RETCODE_OK) {
-        printf("Writer thread: attach_condition error\n");
+        std::cerr << "Writer thread: attach_condition error" << std::endl;
         goto end_writer_thread;
     }
 
@@ -379,7 +377,7 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
             }
             continue; // no need to process active conditions if timeout
         } else if (retcode != DDS_RETCODE_OK) {
-            printf("Writer thread: wait returned error: %d\n", retcode);
+            std::cerr << "Writer thread: wait returned error: " <<  retcode << std::endl;
             goto end_writer_thread;
         }
 
@@ -434,7 +432,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
     // Configure Waitset for Writer Status ****
     DDSStatusCondition *status_condition = myOnChangeWriterThreadInfo->writer->get_statuscondition();
     if (status_condition == NULL) {
-        printf("On Change writer thread: get_statuscondition error\n");
+        std::cerr << "On Change writer thread: get_statuscondition error " << retcode << std::endl; 
         goto end_on_change_thread;
     }
 
@@ -442,20 +440,20 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
     retcode = status_condition->set_enabled_statuses(
             DDS_PUBLICATION_MATCHED_STATUS);
     if (retcode != DDS_RETCODE_OK) {
-        printf("On Change writer thread: set_enabled_statuses error\n");
+        std::cerr << "On Change writer thread: set_enabled_statuses error " << retcode << std::endl; 
         goto end_on_change_thread;
     }
       // Attach Status Conditions to the above waitset
     retcode = waitset->attach_condition(status_condition);
     if (retcode != DDS_RETCODE_OK) {
-        printf("On Change writer thread: attach_condition error\n");
+        std::cerr << "On Change writer thread: attach_condition error " << retcode << std::endl; 
         goto end_on_change_thread;
     }
 
     // Attach Status Conditions to the above waitset
     retcode = waitset->attach_condition(myOnChangeWriterThreadInfo->my_guard_condition());
     if (retcode != DDS_RETCODE_OK) {
-        printf("On Change writer thread: attach_guard_condition error\n");
+        std::cerr << "On Change writer thread: attach_guard_condition error " << retcode << std::endl; 
         goto end_on_change_thread;
     }
 
@@ -468,7 +466,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
             
             continue; // no need to process active conditions if timeout
         } else if (retcode != DDS_RETCODE_OK) {
-            printf("On Change writer thread: wait returned error: %d\n", retcode);
+            std::cerr << "On Change writer thread: wait returned error " << retcode << std::endl; 
             goto end_on_change_thread;
         }
 
@@ -497,7 +495,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                             retcode = myOnChangeWriterThreadInfo->changeStateData-> \
                                 get_ulong(mySeqNum, "sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
                             if (retcode != DDS_RETCODE_OK) {
-                                printf("On Change writer thread: get_data error\n");
+                                std::cerr << "On Change writer thread: get_data error " << retcode << std::endl; 
                                 goto end_on_change_thread;
                             }
                             std::cout << "On Change writer thread - Heartbeat " <<  mySeqNum << std::endl;
@@ -506,7 +504,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                             // Need to set this false after processing - else it just retriggers immediately
                             retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
                             if (retcode != DDS_RETCODE_OK) {
-                                printf("On Change writer thread: set_enabled_guard error\n");
+                                std::cerr << "On Change writer thread: set_enabled_guard error " << retcode << std::endl; 
                                 goto end_on_change_thread;
                             }
                             break;
@@ -519,7 +517,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                             // Need to set this false after processing - else it just retriggers immediately
                             retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
                             if (retcode != DDS_RETCODE_OK) {
-                                printf("On Change writer thread tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME: set_enabled_guard error\n");
+                                std::cerr << "On Change writer thread tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME: set_enabled_guard error " << retcode << std::endl; 
                                 goto end_on_change_thread;
                             }
                             break;
