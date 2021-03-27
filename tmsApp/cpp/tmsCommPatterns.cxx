@@ -200,6 +200,9 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                 case  tms_TOPIC_REQUEST_RESPONSE_ENUM:
                                     std::cout << "Received Request Response Topic" << std::endl;
                                     break;
+                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM: // Device receives from MSM
+                                    std::cout << "Received tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME" << std::endl;
+                                    break;
                                 default: 
                                     std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
                                     break;

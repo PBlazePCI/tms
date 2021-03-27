@@ -410,9 +410,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     
         // check for any internal variables that have changed that are associated
         // with the On Change Topic triggers
-        std::cout << "Membership Result Int: " << internal_membership_result << " Ext: " << external_tms_membership_result << std::endl;
         if (internal_membership_result != external_tms_membership_result) {
-            std::cout << "Main membership resultchange" << std::endl;
             external_tms_membership_result=internal_membership_result;
             retcode = microgridMembershipOutcomeCondit.set_trigger_value(DDS_BOOLEAN_TRUE);
             if (retcode != DDS_RETCODE_OK) {
