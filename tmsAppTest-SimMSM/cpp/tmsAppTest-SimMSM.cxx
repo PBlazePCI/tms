@@ -238,7 +238,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 
     participant = DDSTheParticipantFactory->
             create_participant_from_config(
-                                "TMS_ParticipantLibrary1::TMS_Participant1");
+                                "TMS_ParticipantLibrary1::TMS MSM-Simulation Participant1");
     if (participant == NULL) {
         std::cerr << "create_participant_from_config error " << std::endl << std::flush;
         participant_shutdown(participant);
@@ -253,66 +253,66 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     // and itterate getting writer handles - same with reader handles 
     microgrid_membership_outcome_writer = DDSDynamicDataWriter::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-        participant->lookup_datawriter_by_name("TMS_Publisher1::MicrogridMembershipOutcomeWriter"));
+        participant->lookup_datawriter_by_name("TMS MSM-Simulation Publisher1::MicrogridMembershipOutcomeWriter"));
     if (microgrid_membership_outcome_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::MicrogridMembershipOutcomeWriter lookup_datawriter_by_name error " 
+        std::cerr << "TMS MSM-Simulation Publisher1::MicrogridMembershipOutcomeWriter lookup_datawriter_by_name error " 
         << retcode << std::endl << std::flush; 
 		goto tms_app_test_MSM_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::MicrogridMembershipOutcomeWriter" 
+    std::cout << "Successfully Found: TMS MSM-Simulation Publisher1::MicrogridMembershipOutcomeWriter" 
     << std::endl << std::flush;
 
     source_transition_request_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::SourceTransitionRequestWriter"));
+        participant->lookup_datawriter_by_name("TMS MSM-Simulation Publisher1::SourceTransitionRequestWriter"));
     if (source_transition_request_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::SourceTransitionRequestWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS MSM-Simulation Publisher1::SourceTransitionRequestWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_test_MSM_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::SourceTransitionRequestWriter" 
+    std::cout << "Successfully Found: TMS MSM-Simulation Publisher1::SourceTransitionRequestWriter" 
     << std::endl << std::flush;
 
     request_response_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::RequestResponseWriter"));
+        participant->lookup_datawriter_by_name("TMS MSM-Simulation Publisher1::RequestResponseWriter"));
     if (request_response_writer   == NULL) {
-        std::cerr << "TMS_Publisher1::RequestResponseWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS MSM-Simulation Publisher1::RequestResponseWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_test_MSM_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::RequestResponseWriter" 
+    std::cout << "Successfully Found: TMS MSM-Simulation Publisher1::RequestResponseWriter" 
     << std::endl << std::flush;
 
  	microgrid_membership_request_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::MicrogridMembershipRequestReader")); 
+		participant->lookup_datareader_by_name("TMS MSM-Simulation Subscriber1::MicrogridMembershipRequestReader")); 
     if (microgrid_membership_request_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::MicrogridMembershipRequestReader"
+        std::cerr << "TMS MSM-Simulation Subscriber1::MicrogridMembershipRequestReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_test_MSM_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::MicrogridMembershipRequestReader" 
+    std::cout << "Successfully Found: TMS MSM-Simulation Subscriber1::MicrogridMembershipRequestReader" 
     << std::endl << std::flush;   
 
     request_response_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::RequestResponseReader")); 
+		participant->lookup_datareader_by_name("TMS MSM-Simulation Subscriber1::RequestResponseReader")); 
     if (request_response_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::RequestResponseReader"
+        std::cerr << "TMS MSM-Simulation Subscriber1::RequestResponseReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_test_MSM_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::RequestResponseReader" 
+    std::cout << "Successfully Found: TMS MSM-Simulation Subscriber1::RequestResponseReader" 
     << std::endl << std::flush; 
 
     source_transition_state_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::SourceTransitionStateReader")); 
+		participant->lookup_datareader_by_name("TMS MSM-Simulation Subscriber1::SourceTransitionStateReader")); 
     if (source_transition_state_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::SourceTransitionStateReader"
+        std::cerr << "TMS MSM-Simulation Subscriber1::SourceTransitionStateReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_test_MSM_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::SourceTransitionStateReader" 
+    std::cout << "Successfully Found: TMS MSM-Simulation Subscriber1::SourceTransitionStateReader" 
     << std::endl << std::flush; 
 
 

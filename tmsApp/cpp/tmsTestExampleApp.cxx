@@ -249,7 +249,7 @@ extern "C" int tms_app_main(int sample_count) {
 
     participant = DDSTheParticipantFactory->
             create_participant_from_config(
-                                "TMS_ParticipantLibrary1::TMS_Participant1");
+                                "TMS_ParticipantLibrary1::TMS Device Participant1");
     if (participant == NULL) {
         std::cerr << "create_participant_from_config error " << std::endl << std::flush;
         participant_shutdown(participant);
@@ -263,87 +263,87 @@ extern "C" int tms_app_main(int sample_count) {
     // To Do: create an array of writers w/data handles indexed by enum topic
     // and itterate getting writer handles - same with reader handles 
     heartbeat_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::HeartbeatWriter"));
+        participant->lookup_datawriter_by_name("TMS Device Publisher1::HeartbeatWriter"));
     if (heartbeat_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::HeartbeatWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS Device Publisher1::HeartbeatWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::HeartbeatWriter" 
+    std::cout << "Successfully Found: TMS Device Publisher1::HeartbeatWriter" 
     << std::endl << std::flush;
 
 	device_announcement_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::DeviceAnnouncementWriter"));
+        participant->lookup_datawriter_by_name("TMS Device Publisher1::DeviceAnnouncementWriter"));
     if (device_announcement_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::DeviceAnnouncementWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS Device Publisher1::DeviceAnnouncementWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::MicrogridDeviceAnnouncementWriter" 
+    std::cout << "Successfully Found: TMS Device Publisher1::MicrogridDeviceAnnouncementWriter" 
     << std::endl << std::flush;
 
     microgrid_membership_request_writer = DDSDynamicDataWriter::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-        participant->lookup_datawriter_by_name("TMS_Publisher1::MicrogridMembershipRequestWriter"));
+        participant->lookup_datawriter_by_name("TMS Device Publisher1::MicrogridMembershipRequestWriter"));
     if (microgrid_membership_request_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::MicrogridMembershipRequestWriter lookup_datawriter_by_name error " 
+        std::cerr << "TMS Device Publisher1::MicrogridMembershipRequestWriter lookup_datawriter_by_name error " 
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::MicrogridMembershipRequestWriter" 
+    std::cout << "Successfully Found: TMS Device Publisher1::MicrogridMembershipRequestWriter" 
     << std::endl << std::flush;
 
     source_transition_state_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::SourceTransitionStateWriter"));
+        participant->lookup_datawriter_by_name("TMS Device Publisher1::SourceTransitionStateWriter"));
     if (source_transition_state_writer  == NULL) {
-        std::cerr << "TMS_Publisher1::SourceTransitionStateWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS Device Publisher1::SourceTransitionStateWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::SourceTransitionStateWriter" 
+    std::cout << "Successfully Found: TMS Device Publisher1::SourceTransitionStateWriter" 
     << std::endl << std::flush;
 
     request_response_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS_Publisher1::RequestResponseWriter"));
+        participant->lookup_datawriter_by_name("TMS Device Publisher1::RequestResponseWriter"));
     if (request_response_writer   == NULL) {
-        std::cerr << "TMS_Publisher1::RequestResponseWriter: lookup_datawriter_by_name error "
+        std::cerr << "TMS Device Publisher1::RequestResponseWriter: lookup_datawriter_by_name error "
         << retcode << std::endl << std::flush; 
 		goto tms_app_main_end;
     }
-    std::cout << "Successfully Found: TMS_Publisher1::RequestResponseWriter" 
+    std::cout << "Successfully Found: TMS Device Publisher1::RequestResponseWriter" 
     << std::endl << std::flush;
 
  	microgrid_membership_outcome_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::MicrogridMembershipOutcomeReader")); 
+		participant->lookup_datareader_by_name("TMS Device Subscriber1::MicrogridMembershipOutcomeReader")); 
     if (microgrid_membership_outcome_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::MicrogridMembershipOutcomeReader"
+        std::cerr << "TMS Device Subscriber1::MicrogridMembershipOutcomeReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::MicrogridMembershipOutcomeReader" 
+    std::cout << "Successfully Found: TMS Device Subscriber1::MicrogridMembershipOutcomeReader" 
     << std::endl << std::flush;   
 
     request_response_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::RequestResponseReader")); 
+		participant->lookup_datareader_by_name("TMS Device Subscriber1::RequestResponseReader")); 
     if (request_response_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::RequestResponseReader"
+        std::cerr << "TMS Device Subscriber1::RequestResponseReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::RequestResponseReader" 
+    std::cout << "Successfully Found: TMS Device Subscriber1::RequestResponseReader" 
     << std::endl << std::flush; 
 
     source_transition_request_reader = DDSDynamicDataReader::narrow(
 		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS_Subscriber1::SourceTransitionRequestReader")); 
+		participant->lookup_datareader_by_name("TMS Device Subscriber1::SourceTransitionRequestReader")); 
     if (source_transition_request_reader == NULL) {
-        std::cerr << "TMS_Subscriber1::SourceTransitionRequestReader"
+        std::cerr << "TMS Device Subscriber1::SourceTransitionRequestReader"
         << retcode << std::endl << std::flush;
 		goto tms_app_main_end;
     } 
-    std::cout << "Successfully Found: TMS_Subscriber1::SourceTransitionRequestReader" 
+    std::cout << "Successfully Found: TMS Device Subscriber1::SourceTransitionRequestReader" 
     << std::endl << std::flush; 
 
     product_info_data = device_announcement_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
