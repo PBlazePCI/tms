@@ -73,7 +73,7 @@ LIBS = -L$(NDDSHOME)/lib/$(TARGET_ARCH) \
         -lnddscpp$(SHAREDLIB_SFX)$(DEBUG_SFX) -lnddsc$(SHAREDLIB_SFX)$(DEBUG_SFX) -lnddscore$(SHAREDLIB_SFX)$(DEBUG_SFX) \
         $(SYSLIBS)
 
-SOURCES = $(SOURCE_DIR)tmsCommPatterns.cxx
+SOURCES = $(SOURCE_DIR)tmsCommPatterns.cxx $(SOURCE_DIR)tmsCommPatternTopicHndlrs.cxx
 COMMONSOURCES = $(notdir $(SOURCES))
 
 EXEC          = tmsTestExampleApp
@@ -90,7 +90,7 @@ $(TARGET_ARCH) : $(DIRECTORIES) $(COMMONOBJS) \
 objs/$(TARGET_ARCH)/% : objs/$(TARGET_ARCH)/%.o
 	$(LINKER) $(LINKER_FLAGS)   -o $@ $@.o $(COMMONOBJS) $(LIBS)
 
-objs/$(TARGET_ARCH)/%.o : $(SOURCE_DIR)%.cxx  
+objs/$(TARGET_ARCH)/%.o : $(SOURCE_DIR)%.cxx
 	$(COMPILER) $(COMPILER_FLAGS)  -o $@ $(DEFINES) $(INCLUDES) -c $<
 
 #

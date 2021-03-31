@@ -18,8 +18,7 @@
 
 #include "ndds/ndds_cpp.h"
 #include <pthread.h>
-#include "tmsCommon.h"
-#include "tmsTestExample.h" // This file was created by rticodegen from the official TMS datamodel
+
 #include "tmsCommPatterns.h"
 
 #define ECHO_RQST_RESPONSE true
@@ -28,6 +27,7 @@ bool run_flag = true;
 
 // should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
 unsigned long long sequence_number=0; // ever monotonically increasing for each request sent
+
 
 // Variable associated with Source Transition Request - note the TMS topic struct holds both present and future state
 // so we should be able to leverage the state within the topic
@@ -501,15 +501,7 @@ extern "C" int tms_app_main(int sample_count) {
         // Do your stuff here to interact CAN to DDS (i.e. get devices state and
         // load DDS topics, set change triggers etc.)
     
-        /*
-        // Demo only - normally change value in statement prior to trigger - but heartbeat is also running periodically
-        retcode = heartbeatStateChangeCondit.set_trigger_value(DDS_BOOLEAN_TRUE);
-        if (retcode != DDS_RETCODE_OK) {
-            std::cerr << "Main Heartbeat: set_trigger condition error\n" << std::endl << std::flush;
-            break;
-        }
-        */
-
+ 
         NDDSUtility::sleep(send_period);  // remove eventually 
 
     }

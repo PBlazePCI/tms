@@ -48,23 +48,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
     DDS_DynamicData * request_response_data = NULL;
 
     std::cout << "Created Reader Pthread: " << myReaderThreadInfo->me() << " Topic" << std::endl;
-
-
-    if (myReaderThreadInfo->echoReqResponse()) {  // If response enabled, create the writer data
-        if (myReaderThreadInfo->reqRspWriter == NULL) {
-            std::cerr << "Reader thread: Response enabled, but no writer assigned"  << std::endl;
-            goto end_reader_thread;
-        }
-    
-        // create a data sample - do I need to dispose this if I use a different key each time?
-        request_response_data = myReaderThreadInfo->reqRspWriter->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
-        if (request_response_data == NULL) {
-            std::cerr << "Reader thread: request_response_data: create_data error"
-            << retcode << std::endl << std::flush;
-            goto end_reader_thread;
-        }
-    }
-    
+  
     // Create read condition
     read_condition = myReaderThreadInfo->reader->create_readcondition(
         DDS_NOT_READ_SAMPLE_STATE,
@@ -134,6 +118,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 				retcode = myReaderThreadInfo->reader->take(
 							data_seq, info_seq, DDS_LENGTH_UNLIMITED,
 							DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE, DDS_ANY_INSTANCE_STATE);
+
 				if (retcode == DDS_RETCODE_OK) {
                     // we've got some data for what ever topic we recieved, figure that out, make an
                     // internal variable change as a result (if that's the case) and respond accordingly 
@@ -144,80 +129,81 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 						if (info_seq[i].valid_data) {  
                             if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
 
-                            // what topic did we receive -  i.e. what topic is associated with this thread
-                            switch  (myReaderThreadInfo->topic_enum()) {  
-                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: // MSM Sim receives this from Device
-                                    if (!myReaderThreadInfo->echoReqResponse()) {   // this topic requires and Response
-                                        std::cerr << tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_NAME <<  "resquires Response" << std::endl << std::flush;
-                                        goto end_reader_thread;
-                                    }
-                                    std::cout << tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_NAME << " (should check for MM_JOIN/LEAVE) " << std::endl;
-                                    
-                                    // Send the Request Response here while we have context of the request
-                                    // Get the SampleID and build and send RequestResponse here
-                                    retcode = data_seq[i].get_octet_array(
-                                        tms_sample_id.deviceId,
-                                         &fingerprint_len,
-                                         "requestId.deviceId",
-                                         DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED
-                                         );
-                                    retcode1 = data_seq[i].get_ulonglong(
-                                        tms_sample_id.sequenceNumber,
-                                        "requestId.sequenceNumber",
-                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
-                                    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK) {
-                                        std::cout << "Reader Thread: get_data error" << std::endl;
-                                        goto end_reader_thread;
-                                    }
+                            // *******  Dispatch out to the topic handler ******** 
+                            myReaderThreadInfo->dataSeq = &data_seq;
+                            std::cout << "Recieved Topic" << myReaderThreadInfo->me() << std::endl;
+                            (*reader_handler_ptrs[myReaderThreadInfo->topic_enum()])((void *) myReaderThreadInfo ); // call handler
 
-                                    // At this point we've verified a required response and writer is valid
-                                    // so send it!
-                                    retcode = request_response_data->set_octet_array(
-                                        "relatedRequestId.deviceId", 
-                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
-                                        tms_LEN_Fingerprint, 
-                                        (const DDS_Octet *)&tms_sample_id.deviceId
+                            // Do we need to send an ReqResponse - they are generic for all requests so done here
+                            // To Do: If you require context then you'll need to do this in the specific handler and
+                            // create and use a 'specific Response flag' to skip the generic handler - seems like
+                            // an inheritance of a genericHandler::specificHandler would be the way to go.
+                            if (myReaderThreadInfo->echoReqResponse()) {  // If response enabled, create the writer data
+                                if (myReaderThreadInfo->reqRspWriter == NULL) {
+                                    std::cerr << "Reader thread: Response enabled, but no writer assigned"  << std::endl;
+                                    goto end_reader_thread;
+                                }
+
+                                // Send the Request Response here while we have context of the request
+                                // Get the SampleID and build and send RequestResponse here
+                                retcode = data_seq[i].get_octet_array(
+                                    tms_sample_id.deviceId,
+                                        &fingerprint_len,
+                                        "requestId.deviceId",
+                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED
                                         );
-                                    retcode1 = request_response_data->set_ulonglong(
-                                        "relatedRequestId.sequenceNumber",
-                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
-                                        tms_sample_id.sequenceNumber
-                                        );
-                                    retcode2 = request_response_data->set_ulong(
-                                        "status.code",
-                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
-                                        tms_REPLY_OK
-                                        );
-                                    retcode3 = request_response_data->set_string(
-                                        "status.reason",
-                                        DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
-                                        "Hello World"
-                                        );
-                                    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode3 != DDS_RETCODE_OK) {
-                                        std::cout << "Reader Thread: set_data error\n" << std::endl;
-                                        goto end_reader_thread;
-                                    }
-                                    myReaderThreadInfo->reqRspWriter->write(* request_response_data, DDS_HANDLE_NIL);
-                                    if (retcode != DDS_RETCODE_OK) {
-                                        std::cerr << "Reader Thread: " << tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME << " write Error " << std::endl << std::flush;
-                                        goto end_reader_thread;
-                                    }
-                                    // if we responded tms_REPLY_OK then we should set the internal variable as MMR_COMPLETE
-                                    // the mail_loop of the MSM should now see a difference between the internal state and the tms_state 
-                                    // causing an On Change tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME to get triggered
-                                    internal_membership_result = MMR_COMPLETE;
-                                case  tms_TOPIC_REQUEST_RESPONSE_ENUM:
-                                    std::cout << "Recieved" << tms_TOPIC_REQUEST_RESPONSE_NAME << std::endl;
-                                    break;
-                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM: // Device receives from MSM
-                                    std::cout << "Received " << tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME << std::endl;
-                                    break;
-                                default: 
-                                    std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
-                                    break;
-                            }              
+                                retcode1 = data_seq[i].get_ulonglong(
+                                    tms_sample_id.sequenceNumber,
+                                    "requestId.sequenceNumber",
+                                    DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
+                                if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK) {
+                                    std::cout << "Reader Thread: get_data error" << std::endl;
+                                    goto end_reader_thread;
+                                }
+                            
+                                // create a data sample - do I need to dispose this if I use a different key each time?
+                                request_response_data = myReaderThreadInfo->reqRspWriter->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
+                                if (request_response_data == NULL) {
+                                    std::cerr << "Reader thread: request_response_data: create_data error"
+                                    << retcode << std::endl << std::flush;
+                                    goto end_reader_thread;
+                                }
+
+                                // At this point we've verified a required response and writer is valid
+                                // so send it!
+                                retcode = request_response_data->set_octet_array(
+                                    "relatedRequestId.deviceId", 
+                                    DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                    tms_LEN_Fingerprint, 
+                                    (const DDS_Octet *)&tms_sample_id.deviceId
+                                    );
+                                retcode1 = request_response_data->set_ulonglong(
+                                    "relatedRequestId.sequenceNumber",
+                                    DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                    tms_sample_id.sequenceNumber
+                                    );
+                                retcode2 = request_response_data->set_ulong(
+                                    "status.code",
+                                    DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                    tms_REPLY_OK
+                                    );
+                                retcode3 = request_response_data->set_string(
+                                    "status.reason",
+                                    DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
+                                    "Hello World"
+                                    );
+                                if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode3 != DDS_RETCODE_OK) {
+                                    std::cout << "Reader Thread: set_data error\n" << std::endl;
+                                    goto end_reader_thread;
+                                }
+                                myReaderThreadInfo->reqRspWriter->write(* request_response_data, DDS_HANDLE_NIL);
+                                if (retcode != DDS_RETCODE_OK) {
+                                    std::cerr << "Reader Thread: " << tms_TOPIC_REQUEST_RESPONSE_NAME << " write Error " << std::endl << std::flush;
+                                    goto end_reader_thread;
+                                }
 						
-						}
+						    }
+                        }
 					}
 				} else if (retcode == DDS_RETCODE_NO_DATA) {
 					continue;
@@ -233,6 +219,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 			}
 		}
 	} // While (run_flag)
+
 	end_reader_thread: // reached by ^C or an error
 	std::cout << myReaderThreadInfo->me() << " Reader: Pthread Exiting" << std::endl;
 	exit(0);
@@ -370,6 +357,7 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
         /* We get to timeout if no conditions were triggered */
         if (retcode == DDS_RETCODE_TIMEOUT) {
             if (myPeriodicPublishThreadInfo->enabled) {
+
                 switch (myPeriodicPublishThreadInfo->topic_enum()) {
                     case  tms_TOPIC_HEARTBEAT_ENUM: 
                         std::cout << "Periodic Writer - Heartbeat " << seq_count << std::endl;
@@ -498,49 +486,24 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                 }
             } else if (active_conditions_seq[i] == myOnChangeWriterThreadInfo->my_guard_condition()) {
                 if (myOnChangeWriterThreadInfo->enabled) {
-                    switch (myOnChangeWriterThreadInfo->topic_enum()) {
-                    
-                        case  tms_TOPIC_HEARTBEAT_ENUM: 
-                            // Example code where I make heartbeat an On Change writer vs Periodic - get sequence number for display
-                            DDS_UnsignedLong mySeqNum; // sequence is set/incremented in main loop where the condit trigger is set
-                            retcode = myOnChangeWriterThreadInfo->changeStateData-> \
-                                get_ulong(mySeqNum, "sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED);
-                            if (retcode != DDS_RETCODE_OK) {
-                                std::cerr << "On Change writer thread: get_data error " << retcode << std::endl; 
-                                goto end_on_change_thread;
-                            }
-                            std::cout << "On Change writer thread - Heartbeat " <<  mySeqNum << std::endl;
 
-                            myOnChangeWriterThreadInfo->writer->write(* myOnChangeWriterThreadInfo->changeStateData, DDS_HANDLE_NIL);
-                            // Need to set this false after processing - else it just retriggers immediately
-                            retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
-                            if (retcode != DDS_RETCODE_OK) {
-                                std::cerr << "On Change writer thread: set_enabled_guard error " << retcode << std::endl; 
-                                goto end_on_change_thread;
-                            }
-                            break;
+                    // IFF you need specific OnChange handling you can make a call from here
+                    // You will also need to set up an array of OnChange handler pointers
 
-                        case  tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM:
-
-                            std::cout << "On Change writer thread - tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME " <<  mySeqNum << std::endl;
-
-                            myOnChangeWriterThreadInfo->writer->write(* myOnChangeWriterThreadInfo->changeStateData, DDS_HANDLE_NIL);
-                            // Need to set this false after processing - else it just retriggers immediately
-                            retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
-                            if (retcode != DDS_RETCODE_OK) {
-                                std::cerr << "On Change writer thread tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME: set_enabled_guard error " << retcode << std::endl; 
-                                goto end_on_change_thread;
-                            }
-                            break;
-                                
-                        default: 
-                            std::cout << "On Change writer thread - default topic fall through" << std::endl;
-                            break;
+                    myOnChangeWriterThreadInfo->writer->write(* myOnChangeWriterThreadInfo->changeStateData, DDS_HANDLE_NIL);
+                    // Need to set this false after processing - else it just retriggers immediately
+                    retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
+                    if (retcode != DDS_RETCODE_OK) {
+                        std::cerr << "On Change writer thread " << myOnChangeWriterThreadInfo->me()
+                        << ": set_enabled_guard error " << retcode << std::endl; 
+                        goto end_on_change_thread;
                     }
+
                 }
             } else {
                 // writers can only have status condition
-                std::cout << myOnChangeWriterThreadInfo->me() << " Writer: False Writer Event Trigger" << std::endl;
+                std::cout << "On Change writer thread " << myOnChangeWriterThreadInfo->me() 
+                << " Writer: False Writer Event Trigger" << std::endl;
             }
         }
 	} // While (run_flag)

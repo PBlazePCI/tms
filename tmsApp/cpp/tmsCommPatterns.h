@@ -13,6 +13,7 @@
 
 #include "tmsTestExample.h"
 #include "tmsCommon.h"
+#include "tmsCommPatternTopicHndlrs.h"
 
 extern bool run_flag;
 
@@ -28,6 +29,8 @@ extern enum tms_SourceTransition internal_source_transition_state;
 extern enum tms_SourceTransition external_tms_source_transition_state; 
 
 extern const char topic_name_array[tms_TOPIC_LAST_SENTINEL_ENUM][tms_MAXLEN_TopicName];
+
+extern HandlerPtr reader_handler_ptrs[]; // list of Reader topic handlers
 
 /* This Interface provides threads for tms Communications Patterns
    (tms Microgrid Standard section 4.9.2)
@@ -51,6 +54,7 @@ class ReaderThreadInfo {
 
         // if echoResponse set true this writer will be used to echo the response
         DDSDynamicDataWriter * reqRspWriter;
+        DDS_DynamicDataSeq * dataSeq; // pass in dataSeq for handler to process
         
     private:
         enum TOPICS_E myTopicEnum;

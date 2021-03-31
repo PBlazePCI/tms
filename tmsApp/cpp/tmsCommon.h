@@ -11,6 +11,8 @@
 #ifndef tmsCommon_h
 #define tmsCommon_h
 
+typedef void (*HandlerPtr)(void *); // function pointer to a handler
+
 enum TOPICS_E { 
     tms_TOPIC_ACTIVE_DIAGNOSTICS_ENUM,
     tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_ENUM,
