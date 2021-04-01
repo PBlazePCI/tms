@@ -36,7 +36,8 @@
 #include "tmsCommPatterns.h"
 
 
-void GenericDefaultHandler(void * infoBlck); // This handler will get called if no handler is installed
+void GenericDefaultReaderHandler(void * infoBlck);          // Default Reader handler used to initialize array of handlers
+void GenericDefaultPeriodicWriterHandler(void * infoBlck);  // Default Periodic Writer handler used to initialize array of handlers
 void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck);
 void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (void * infoBlck);
 void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (void * infoBlck);
