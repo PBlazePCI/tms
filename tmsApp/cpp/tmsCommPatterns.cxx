@@ -26,6 +26,7 @@ ReaderThreadInfo::ReaderThreadInfo(enum TOPICS_E topicEnum, bool echoResponse)
             myTopicEnum = topicEnum;
             echo_response = echoResponse; // default not to echo a response (rcv'd type not a request) 
             reqRspWriter = NULL;  // initialize to NULL and perform a checks if the user requres an echoResponse
+            tms_REPLY_code = tms_REPLY_OK; // default to ok
         }
 
 bool    ReaderThreadInfo::echoReqResponse() { return echo_response; }
@@ -131,7 +132,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 
                             // *******  Dispatch out to the topic handler ******** 
                             myReaderThreadInfo->dataSeq = &data_seq;
-                            std::cout << "Recieved Topic" << myReaderThreadInfo->me() << std::endl;
+                            // std::cout << "Recieved: " << myReaderThreadInfo->me() << std::endl; // announce oneself in handler
                             (*reader_handler_ptrs[myReaderThreadInfo->topic_enum()])((void *) myReaderThreadInfo ); // call handler
 
                             // Do we need to send an ReqResponse - they are generic for all requests so done here
@@ -185,7 +186,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                 retcode2 = request_response_data->set_ulong(
                                     "status.code",
                                     DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
-                                    tms_REPLY_OK
+                                    myReaderThreadInfo->tms_REPLY_code
                                     );
                                 retcode3 = request_response_data->set_string(
                                     "status.reason",
@@ -324,30 +325,29 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
 	DDSWaitSet * waitset = waitset = new DDSWaitSet();;
     DDS_ReturnCode_t retcode;
     DDSConditionSeq active_conditions_seq;
-    long int seq_count = 0;
 
     std::cout << "Created Periodic Publisher Pthread: " << myPeriodicPublishThreadInfo->me() << " Topic" << std::endl;
 
     // Configure Waitset for Writer Status ****
     DDSStatusCondition *status_condition = myPeriodicPublishThreadInfo->writer->get_statuscondition();
     if (status_condition == NULL) {
-        std::cerr << "Writer thread: get_statuscondition error" << std::endl;
-        goto end_writer_thread;
+        std::cerr << "PeriodicWriter thread: get_statuscondition error" << std::endl;
+        goto end_periodic_writer_thread;
     }
 
     // Set enabled statuses
     retcode = status_condition->set_enabled_statuses(
             DDS_PUBLICATION_MATCHED_STATUS);
     if (retcode != DDS_RETCODE_OK) {
-        std::cerr << "Writer thread: set_enabled_statuses error" << std::endl;
-        goto end_writer_thread;
+        std::cerr << "PeriodicWriter thread: set_enabled_statuses error" << std::endl;
+        goto end_periodic_writer_thread;
     }
 
     // Attach Status Conditions to the above waitset
     retcode = waitset->attach_condition(status_condition);
     if (retcode != DDS_RETCODE_OK) {
-        std::cerr << "Writer thread: attach_condition error" << std::endl;
-        goto end_writer_thread;
+        std::cerr << "PeriodicWriter thread: attach_condition error" << std::endl;
+        goto end_periodic_writer_thread;
     }
 
     // wait() blocks execution of the thread until one or more attached condition triggers  
@@ -358,26 +358,20 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
         if (retcode == DDS_RETCODE_TIMEOUT) {
             if (myPeriodicPublishThreadInfo->enabled) {
 
-                switch (myPeriodicPublishThreadInfo->topic_enum()) {
-                    case  tms_TOPIC_HEARTBEAT_ENUM: 
-                        std::cout << "Periodic Writer - Heartbeat " << seq_count << std::endl;
-                        retcode = myPeriodicPublishThreadInfo->periodicData->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, seq_count);
-                        if (retcode != DDS_RETCODE_OK) {
-                            std::cerr << "heartbeat: Dynamic Data Set Error" << std::endl << std::flush;
-                            break;
-                        }
-                        myPeriodicPublishThreadInfo->writer->write(* myPeriodicPublishThreadInfo->periodicData, DDS_HANDLE_NIL);
-                        seq_count++; // increment seq_count here so 1) it starts at 0 as prescribed by TMS, 2) changes once per write of heartbeat
-                        break;
-                    default: 
-                        std::cout << "Periodic Writer - default topic fall through" << std::endl;
-                        break;
-                }
+
+                // *******  Dispatch out to the topic handler ******** s
+                // std::cout << "Sending Periodic Topic: " << myPeriodicPublishThreadInfo->me() << std::endl; // announce self in handler
+                (*periodic_handler_ptrs[myPeriodicPublishThreadInfo->topic_enum()])((void *) myPeriodicPublishThreadInfo); // call handler
+
+                myPeriodicPublishThreadInfo->writer->write(* myPeriodicPublishThreadInfo->periodicData, DDS_HANDLE_NIL);
+
             }
+
             continue; // no need to process active conditions if timeout
+
         } else if (retcode != DDS_RETCODE_OK) {
-            std::cerr << "Writer thread: wait returned error: " <<  retcode << std::endl;
-            goto end_writer_thread;
+            std::cerr << "PeriodicWriter thread: wait returned error: " <<  retcode << std::endl;
+            goto end_periodic_writer_thread;
         }
 
         /* Get the number of active conditions */
@@ -401,8 +395,8 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
             }
         }
 	} // While (run_flag)
-	end_writer_thread: // reached by ^C or an error
-	std::cout << myPeriodicPublishThreadInfo->me() << " Writer: Pthread Exiting"<< std::endl;
+	end_periodic_writer_thread: // reached by ^C or an error
+	std::cout << myPeriodicPublishThreadInfo->me() << " PeriodicWriter: Pthread Exiting"<< std::endl;
 	exit(0);
 }
 
@@ -489,7 +483,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
 
                     // IFF you need specific OnChange handling you can make a call from here
                     // You will also need to set up an array of OnChange handler pointers
-
+                    std::cout << "On Change write triggered: " << myOnChangeWriterThreadInfo->me() << std::endl;
                     myOnChangeWriterThreadInfo->writer->write(* myOnChangeWriterThreadInfo->changeStateData, DDS_HANDLE_NIL);
                     // Need to set this false after processing - else it just retriggers immediately
                     retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);

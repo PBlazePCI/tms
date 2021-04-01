@@ -61,8 +61,64 @@ HandlerPtr reader_handler_ptrs[] = {
     GenericDefaultHandler,                                  // tms_TOPIC_LOAD_SHARING_REQUEST_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_LOAD_SHARING_STATUS_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_MICROGRID_CONNECTION_LIST_ENUM,
-    GenericDefaultHandler,                                  // tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM,
+    ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME,   // tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM,
     ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST,   // tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_OPERATOR_CONNECTION_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_OPERATOR_INTENT_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_OPERATOR_INTENT_STATE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_POWER_SWITCH_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_RELEASE_CONFIG_REQUEST_ENUM,
+    ReaderHandler_tms_TOPIC_REQUEST_RESPONSE,               // tms_TOPIC_REQUEST_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_RESERVE_CONFIG_REPLY_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_RESERVE_CONFIG_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_STANDARD_CONFIG_MASTER_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_CONTROL_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_CONTROL_STATUS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_INFO_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_STATE_ENUM,
+    GenericDefaultHandler                                   // tms_TOPIC_LAST_SENTINEL_ENUM        
+};
+
+HandlerPtr periodic_handler_ptrs[] = { 
+    GenericDefaultHandler,                                  // tms_TOPIC_ACTIVE_DIAGNOSTICS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_CONFIG_RESERVATION_STATE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_COPY_CONFIG_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DC_DEVICE_POWER_MEASUREMENT_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DC_LOAD_SHARING_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DC_LOAD_SHARING_STATUS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_CLOCK_STATUS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_GROUNDING_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_GROUNDING_STATUS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_PARAMETER_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_PARAMETER_STATUS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_POWER_MEASUREMENT_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_POWER_PORT_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DEVICE_POWER_STATUS_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_DISCOVERED_CONNECTION_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_ENGINE_STATE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_FINGERPRINT_NICKNAME_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_FINGERPRINT_NICKNAME_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_CONTENTS_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_DC_LOAD_SHARING_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_DEVICE_PARAMETER_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_GROUNDING_CIRCUIT_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_LOAD_SHARING_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_POWER_SWITCH_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_SOURCE_TRANSITION_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GET_CONFIG_STORAGE_CONTROL_RESPONSE_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_GROUNDING_CIRCUIT_REQUEST_ENUM,
+    PeriodicWriterHandler_tms_TOPIC_HEARTBEAT,              // tms_TOPIC_HEARTBEAT_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_LOAD_SHARING_REQUEST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_LOAD_SHARING_STATUS_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_MICROGRID_CONNECTION_LIST_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM,
+    GenericDefaultHandler,                                  // tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_OPERATOR_CONNECTION_LIST_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_OPERATOR_INTENT_REQUEST_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_OPERATOR_INTENT_STATE_ENUM,
@@ -78,69 +134,13 @@ HandlerPtr reader_handler_ptrs[] = {
     GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_CONTROL_STATUS_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_INFO_ENUM,
     GenericDefaultHandler,                                  // tms_TOPIC_STORAGE_STATE_ENUM,
-    GenericDefaultHandler                                   // tms_TOPIC_LAST_SENTINEL_ENUM        
+    GenericDefaultHandler,                                  // tms_TOPIC_LAST_SENTINEL_ENUM        
 };
-
-HandlerPtr periodic_handler_ptrs[] = { 
-    GenericDefaultHandler, // tms_TOPIC_ACTIVE_DIAGNOSTICS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_CONFIG_RESERVATION_STATE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_COPY_CONFIG_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DC_DEVICE_POWER_MEASUREMENT_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DC_LOAD_SHARING_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DC_LOAD_SHARING_STATUS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_CLOCK_STATUS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_GROUNDING_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_GROUNDING_STATUS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_PARAMETER_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_PARAMETER_STATUS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_POWER_MEASUREMENT_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_POWER_PORT_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DEVICE_POWER_STATUS_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_DISCOVERED_CONNECTION_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_ENGINE_STATE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_FINGERPRINT_NICKNAME_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_FINGERPRINT_NICKNAME_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_CONTENTS_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_DC_LOAD_SHARING_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_DEVICE_PARAMETER_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_GROUNDING_CIRCUIT_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_LOAD_SHARING_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_POWER_SWITCH_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_SOURCE_TRANSITION_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GET_CONFIG_STORAGE_CONTROL_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_GROUNDING_CIRCUIT_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_HEARTBEAT_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_LOAD_SHARING_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_LOAD_SHARING_STATUS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_MICROGRID_CONNECTION_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_OPERATOR_CONNECTION_LIST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_OPERATOR_INTENT_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_OPERATOR_INTENT_STATE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_POWER_SWITCH_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_RELEASE_CONFIG_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_REQUEST_RESPONSE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_RESERVE_CONFIG_REPLY_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_RESERVE_CONFIG_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_STANDARD_CONFIG_MASTER_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_STORAGE_CONTROL_REQUEST_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_STORAGE_CONTROL_STATUS_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_STORAGE_INFO_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_STORAGE_STATE_ENUM,
-    GenericDefaultHandler, // tms_TOPIC_LAST_SENTINEL_ENUM        
-};
-
 
 
 void GenericDefaultHandler(void * infoBlck) {
-    std::cout << "No Handler attatched to this topic" << std::endl;
+    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+    std::cout << "No Handler attatched to topic: " << myReaderThreadInfo->me() << std::endl;
     return;
 }
 
@@ -149,10 +149,11 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
     ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
     std::cout <<  myReaderThreadInfo->me() << " (should check for MM_JOIN/LEAVE) " << std::endl;
 
-    // ****** PUT WHAT YOU NEED TO DO SPECIFICALLY FOR 
+    // ****** PUT WHAT YOU NEED TO DO SPECIFICALLY FOR YOU TOPIC HERE
 
-    // if we responded tms_REPLY_OK then we should set the internal variable as MMR_COMPLETE
-    // the mail_loop of the MSM should now see a difference between the internal state and the tms_state 
+    // The GENERIC sends tms_REPLY_OK  unless we change it in the infoBlck here. If we send
+    // tms_REPLY_OK, then we should set the internal variable as MMR_COMPLETE
+    // The main_loop of the MSM should now see a difference between the internal state and the tms_state 
     // causing an On Change tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME to get triggered
     internal_membership_result = MMR_COMPLETE;
     
@@ -160,23 +161,29 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
    return;
 }
 
+void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (void * infoBlck) {
+    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+    std::cout << "Receive Handler - Received " << myReaderThreadInfo->me() << std::endl;
+}
 
-                           /*
-                            switch  (myReaderThreadInfo->topic_enum()) {  
+void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (void * infoBlck) {
+    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+    std::cout << "Receive Handler - received " << myReaderThreadInfo->me() << std::endl;
+}
 
-                                
+long int hb_seq_count = 0; // specific hb sequence - To Do: don't like it being a global
+void PeriodicWriterHandler_tms_TOPIC_HEARTBEAT (void * infoBlck) {
+    // Periodic Handler to send specific periodic data for Heartbeat topic 
+    
+    DDS_ReturnCode_t retcode;
+    PeriodicWriterThreadInfo * myPeriodicPublishThreadInfo = (PeriodicWriterThreadInfo *) infoBlck; 
 
-                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM: // MSM Sim receives this from Device
-                                    
-                                case  tms_TOPIC_REQUEST_RESPONSE_ENUM:
-                                    std::cout << "Recieved" << tms_TOPIC_REQUEST_RESPONSE_NAME << std::endl;
-                                    break;
-                                case  tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM: // Device receives from MSM
-                                    std::cout << "Received " << tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_NAME << std::endl;
-                                    break;
-                                default: 
-                                    std::cout << "Received unhandled Topic - default topic fall through" << std::endl;
-                                    break;
-                            } 
-                            */  
+    std::cout << "Periodic Writer Handler - Heartbeat " << hb_seq_count << std::endl;
+    retcode = myPeriodicPublishThreadInfo->periodicData->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, hb_seq_count);
+    hb_seq_count++; // increment seq_count here so 1) it starts at 0 as prescribed by TMS, 2) changes once per write of heartbeat
+    if (retcode != DDS_RETCODE_OK) {
+        std::cerr << "heartbeat: Dynamic Data Set Error" << std::endl << std::flush;
+    };
+
+}
     

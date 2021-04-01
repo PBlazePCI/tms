@@ -10,8 +10,9 @@
 */
 
 /*  This file is really an extension of the tmsCommsPattern.cxx and hold the
-    Reader/Writer handlers that are dispatched from the comm patterns. As such 
-    these functions are called with in the context of the thread processing a 
+    Reader/Writer handlers that are dispatched from the comm patterns.  They are
+    intended perform functions specific to individual topics (topic handers).  
+    These functions are called with in the context of the thread processing a 
     particular pattern. 
 
     The signature and naming convention is:
@@ -32,15 +33,14 @@
 #define tmsCommsPatternTopicHndlrs_h
 
 #include "tmsCommon.h"
-#include "tmsCommPatternTopicHndlrs.h"
 #include "tmsCommPatterns.h"
 
 
-void GenericDefaultHandler(void * InfoBlck); // This handler will get called if no handler is installed
-void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * InfoBlck);
-void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (void * InfoBlck);
-void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (void * InfoBlck);
+void GenericDefaultHandler(void * infoBlck); // This handler will get called if no handler is installed
+void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck);
+void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (void * infoBlck);
+void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (void * infoBlck);
 
-void PeriodicWriterHandler_tms_TOPIC_HEARTBEAT (void * InfoBlck);
+void PeriodicWriterHandler_tms_TOPIC_HEARTBEAT (void * isnfoBlck);
 
 #endif
