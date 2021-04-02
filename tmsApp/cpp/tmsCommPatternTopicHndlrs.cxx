@@ -165,10 +165,8 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
     // causing an On Change tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME to get triggered
     internal_membership_result = MMR_COMPLETE;
 
-    strncpy (myReaderThreadInfo->reason, "Goodbye World", tms_MAXLEN_reason); // default reason
+    //strncpy (myReaderThreadInfo->reason, "Goodbye World", tms_MAXLEN_reason); // example change default reason
 
-     
-    
    end_reader_hndlr:
    return;
 }
