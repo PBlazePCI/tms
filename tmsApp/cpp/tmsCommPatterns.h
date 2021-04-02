@@ -38,6 +38,12 @@ extern HandlerPtr periodic_handler_ptrs[]; // list of Reader topic handlers
    All Patterns monitor for Status conditions (refer to enum DDS_StatusKind). 
    The ChangeState pattern also monitors Guard conditions to trigger a write.
    The Request/reply and read will monitor On Data Available (read) and then write. 
+
+   NOTE: The classes here provide control information for the different threads that
+   support each communications pattern. There should be NO TOPIC SPECIFIC information
+   in these control blocks.  The closest we come is to provide a echoResponse() and 
+   tms_REPLY_code in the reader to handle the group of tms_<>_REQUESTs that we know
+   require a response.
 */
 
 class ReaderThreadInfo {
@@ -55,11 +61,14 @@ class ReaderThreadInfo {
         // if echoResponse set true this writer will be used to echo the response
         DDSDynamicDataWriter * reqRspWriter;
         DDS_DynamicDataSeq * dataSeq; // pass in dataSeq for handler to process
-        DDS_UnsignedLong tms_REPLY_code; 
+        DDS_UnsignedLong tms_REPLY_code;
+        char reason[tms_MAXLEN_reason];
+
         
     private:
         enum TOPICS_E myTopicEnum;
         bool echo_response; // used for received request topics
+
 };
 void*  pthreadToProcReaderEvents(void  * readerThreadInfo);
 

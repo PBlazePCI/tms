@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <string.h>
 #include <signal.h>
 #include <iostream>
 
@@ -27,6 +28,7 @@ ReaderThreadInfo::ReaderThreadInfo(enum TOPICS_E topicEnum, bool echoResponse)
             echo_response = echoResponse; // default not to echo a response (rcv'd type not a request) 
             reqRspWriter = NULL;  // initialize to NULL and perform a checks if the user requres an echoResponse
             tms_REPLY_code = tms_REPLY_OK; // default to ok
+            strncpy (reason, "Hello World", tms_MAXLEN_reason); // default reason
         }
 
 bool    ReaderThreadInfo::echoReqResponse() { return echo_response; }
@@ -191,7 +193,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                 retcode3 = request_response_data->set_string(
                                     "status.reason",
                                     DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED,
-                                    "Hello World"
+                                    myReaderThreadInfo->reason
                                     );
                                 if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode3 != DDS_RETCODE_OK) {
                                     std::cout << "Reader Thread: set_data error\n" << std::endl;

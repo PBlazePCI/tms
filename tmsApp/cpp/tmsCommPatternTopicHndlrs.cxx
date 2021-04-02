@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <string.h>
 #include "tmsCommPatternTopicHndlrs.h"
 
 // Global arrays of different pattern handlers - we need separate arrays in case
@@ -163,6 +164,10 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
     // The main_loop of the MSM should now see a difference between the internal state and the tms_state 
     // causing an On Change tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME to get triggered
     internal_membership_result = MMR_COMPLETE;
+
+    strncpy (myReaderThreadInfo->reason, "Goodbye World", tms_MAXLEN_reason); // default reason
+
+     
     
    end_reader_hndlr:
    return;
