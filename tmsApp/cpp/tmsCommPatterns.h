@@ -19,6 +19,8 @@
 #define MY_PERIODIC_TOPIC_NAME topic_name_array[myPeriodicWriterThreadInfo->topic_enum()]
 #define MY_ON_CHANGE_TOPIC_NAME topic_name_array[myOnChangeWriterThreadInfo->topic_enum()]
 
+typedef void (*HandlerPtr)(void *); // function pointer to a handler
+
 extern bool run_flag;
 
 // should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern

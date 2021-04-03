@@ -11,7 +11,6 @@
 #ifndef tmsCommon_h
 #define tmsCommon_h
 
-typedef void (*HandlerPtr)(void *); // function pointer to a handler
 
 
 enum TOPICS_E { 
