@@ -14,6 +14,11 @@
 #include "tmsTestExample.h"
 #include "tmsCommon.h"
 
+#define MY_READER_TOPIC_NAME topic_name_array[myReaderThreadInfo->topic_enum()]
+#define MY_WRITER_TOPIC_NAME topic_name_array[myWriterEventsThreadInfo->topic_enum()]
+#define MY_PERIODIC_TOPIC_NAME topic_name_array[myPeriodicWriterThreadInfo->topic_enum()]
+#define MY_ON_CHANGE_TOPIC_NAME topic_name_array[myOnChangeWriterThreadInfo->topic_enum()]
+
 extern bool run_flag;
 
 // should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
