@@ -26,7 +26,7 @@
 
 // Global arrays of different pattern handlers - we need separate arrays in case
 // the same topic is both a reader and writer (e.g., RequestResponse)
-HandlerPtr reader_handler_ptrs[] = {
+ReaderHandlerPtr reader_handler_ptrs[] = {
     GenericDefaultReaderHandler,                            // tms_TOPIC_ACTIVE_DIAGNOSTICS_ENUM,,
     GenericDefaultReaderHandler,                            // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_ENUM ,,
     GenericDefaultReaderHandler,                            // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_REQUEST_ENUM,
@@ -82,7 +82,7 @@ HandlerPtr reader_handler_ptrs[] = {
     GenericDefaultReaderHandler                             // tms_TOPIC_LAST_SENTINEL_ENUM        
 };
 
-HandlerPtr periodic_handler_ptrs[] = { 
+PeriodicWriterHandlerPtr periodic_handler_ptrs[] = { 
     GenericDefaultPeriodicWriterHandler,                    // tms_TOPIC_ACTIVE_DIAGNOSTICS_ENUM,
     GenericDefaultPeriodicWriterHandler,                    // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_ENUM,
     GenericDefaultPeriodicWriterHandler,                    // tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_REQUEST_ENUM,
@@ -139,22 +139,19 @@ HandlerPtr periodic_handler_ptrs[] = {
 };
 
 
-void GenericDefaultReaderHandler(void * infoBlck) {
-    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+void GenericDefaultReaderHandler(ReaderThreadInfo * myReaderThreadInfo) {
+    //ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
     std::cout << "No Handler attatched to topic: " << MY_READER_TOPIC_NAME << std::endl;
     return;
 }
 
-void GenericDefaultPeriodicWriterHandler(void * infoBlck) {
-    PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo = (PeriodicWriterThreadInfo *) infoBlck; 
+void GenericDefaultPeriodicWriterHandler(PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo) {
     std::cout << "No Handler attatched to topic: " << MY_PERIODIC_TOPIC_NAME << std::endl;
     return;
 }
 
 
-void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
-    // To Do - can the cast be avoided i.e. pass in a  ReaderThreadInfo *  vs void *
-    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (ReaderThreadInfo * myReaderThreadInfo) {
     std::cout << "Receive Handler - Recieved " << MY_READER_TOPIC_NAME << " (should check for MM_JOIN/LEAVE) " << std::endl;
 
     // ****** PUT WHAT YOU NEED TO DO SPECIFICALLY FOR YOU TOPIC HERE
@@ -171,22 +168,19 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
    return;
 }
 
-void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (void * infoBlck) {
-    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (ReaderThreadInfo * myReaderThreadInfo) {
     std::cout << "Receive Handler - Received " << MY_READER_TOPIC_NAME << std::endl;
 }
 
-void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (void * infoBlck) {
-    ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
+void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (ReaderThreadInfo * myReaderThreadInfo) {
     std::cout << "Receive Handler - received " << MY_READER_TOPIC_NAME << std::endl;
 }
 
 long int hb_seq_count = 0; // specific hb sequence - To Do: don't like it being a global
-void PeriodicWriterHandler_tms_TOPIC_HEARTBEAT (void * infoBlck) {
+void PeriodicWriterHandler_tms_TOPIC_HEARTBEAT (PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo) {
     // Periodic Handler to send specific periodic data for Heartbeat topic 
 
     DDS_ReturnCode_t retcode;
-    PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo = (PeriodicWriterThreadInfo *) infoBlck; 
 
     std::cout << "Periodic Writer Handler - Heartbeat " << hb_seq_count << std::endl;
     retcode = myPeriodicWriterThreadInfo->periodicData->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, hb_seq_count);

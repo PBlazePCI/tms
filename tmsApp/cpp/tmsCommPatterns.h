@@ -19,7 +19,11 @@
 #define MY_PERIODIC_TOPIC_NAME topic_name_array[myPeriodicWriterThreadInfo->topic_enum()]
 #define MY_ON_CHANGE_TOPIC_NAME topic_name_array[myOnChangeWriterThreadInfo->topic_enum()]
 
-typedef void (*HandlerPtr)(void *); // function pointer to a handler
+class ReaderThreadInfo;
+class PeriodicWriterThreadInfo;
+
+typedef void (*ReaderHandlerPtr)(ReaderThreadInfo *); // function pointer to a handler
+typedef void (*PeriodicWriterHandlerPtr)(PeriodicWriterThreadInfo *); // function pointer to a handler
 
 extern bool run_flag;
 
@@ -36,8 +40,9 @@ extern enum tms_SourceTransition external_tms_source_transition_state;
 
 extern const char topic_name_array[tms_TOPIC_LAST_SENTINEL_ENUM][tms_MAXLEN_TopicName];
 
-extern HandlerPtr reader_handler_ptrs[]; // list of Reader topic handlers
-extern HandlerPtr periodic_handler_ptrs[]; // list of Reader topic handlers
+extern ReaderHandlerPtr reader_handler_ptrs[]; // list of Reader topic handlers
+extern PeriodicWriterHandlerPtr periodic_handler_ptrs[]; // list of Reader topic handlers
+
 
 /* This Interface provides threads for tms Communications Patterns
    (tms Microgrid Standard section 4.9.2)

@@ -134,7 +134,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                             // *******  Dispatch out to the topic handler ******** 
                             myReaderThreadInfo->dataSeq = &data_seq;
                             // std::cout << "Recieved: " << MY_READER_TOPIC_NAME << std::endl; // announce oneself in handler
-                            (*reader_handler_ptrs[myReaderThreadInfo->topic_enum()])((void *) myReaderThreadInfo ); // call handler
+                            (*reader_handler_ptrs[myReaderThreadInfo->topic_enum()])(myReaderThreadInfo); // call handler
 
                             // Do we need to send an ReqResponse - they are generic for all requests so done here
                             // To Do: If you require context then you'll need to do this in the specific handler and
@@ -360,7 +360,7 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
 
                 // *******  Dispatch out to the topic handler ******** s
                 // std::cout << "Sending Periodic Topic: " << MY_PERIODIC_TOPIC_NAME << std::endl; // announce self in handler
-                (*periodic_handler_ptrs[myPeriodicWriterThreadInfo->topic_enum()])((void *) myPeriodicWriterThreadInfo); // call handler
+                (*periodic_handler_ptrs[myPeriodicWriterThreadInfo->topic_enum()])(myPeriodicWriterThreadInfo); // call handler
 
                 myPeriodicWriterThreadInfo->writer->write(* myPeriodicWriterThreadInfo->periodicData, DDS_HANDLE_NIL);
 
