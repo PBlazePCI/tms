@@ -13,6 +13,12 @@
 
 typedef void (*HandlerPtr)(void *); // function pointer to a handler
 
+#define MY_READER_TOPIC_NAME topic_name_array[myReaderThreadInfo->topic_enum()]
+#define MY_WRITER_TOPIC_NAME topic_name_array[myWriterEventsThreadInfo->topic_enum()]
+#define MY_PERIODIC_TOPIC_NAME topic_name_array[myPeriodicWriterThreadInfo->topic_enum()]
+#define MY_ON_CHANGE_TOPIC_NAME topic_name_array[myOnChangeWriterThreadInfo->topic_enum()]
+
+
 enum TOPICS_E { 
     tms_TOPIC_ACTIVE_DIAGNOSTICS_ENUM,
     tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME_ENUM,

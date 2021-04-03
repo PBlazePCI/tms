@@ -141,13 +141,13 @@ HandlerPtr periodic_handler_ptrs[] = {
 
 void GenericDefaultReaderHandler(void * infoBlck) {
     ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
-    std::cout << "No Handler attatched to topic: " << myReaderThreadInfo->me() << std::endl;
+    std::cout << "No Handler attatched to topic: " << MY_READER_TOPIC_NAME << std::endl;
     return;
 }
 
 void GenericDefaultPeriodicWriterHandler(void * infoBlck) {
     PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo = (PeriodicWriterThreadInfo *) infoBlck; 
-    std::cout << "No Handler attatched to topic: " << myPeriodicWriterThreadInfo->me() << std::endl;
+    std::cout << "No Handler attatched to topic: " << MY_PERIODIC_TOPIC_NAME << std::endl;
     return;
 }
 
@@ -155,7 +155,7 @@ void GenericDefaultPeriodicWriterHandler(void * infoBlck) {
 void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
     // To Do - can the cast be avoided i.e. pass in a  ReaderThreadInfo *  vs void *
     ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
-    std::cout <<  myReaderThreadInfo->me() << " (should check for MM_JOIN/LEAVE) " << std::endl;
+    std::cout << "Received " << MY_READER_TOPIC_NAME << " (should check for MM_JOIN/LEAVE) " << std::endl;
 
     // ****** PUT WHAT YOU NEED TO DO SPECIFICALLY FOR YOU TOPIC HERE
 
@@ -173,12 +173,12 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
 
 void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (void * infoBlck) {
     ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
-    std::cout << "Receive Handler - Received " << myReaderThreadInfo->me() << std::endl;
+    std::cout << "Receive Handler - Received " << MY_READER_TOPIC_NAME << std::endl;
 }
 
 void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (void * infoBlck) {
     ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
-    std::cout << "Receive Handler - received " << myReaderThreadInfo->me() << std::endl;
+    std::cout << "Receive Handler - received " << MY_READER_TOPIC_NAME << std::endl;
 }
 
 long int hb_seq_count = 0; // specific hb sequence - To Do: don't like it being a global
@@ -186,10 +186,10 @@ void PeriodicWriterHandler_tms_TOPIC_HEARTBEAT (void * infoBlck) {
     // Periodic Handler to send specific periodic data for Heartbeat topic 
 
     DDS_ReturnCode_t retcode;
-    PeriodicWriterThreadInfo * myPeriodicPublishThreadInfo = (PeriodicWriterThreadInfo *) infoBlck; 
+    PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo = (PeriodicWriterThreadInfo *) infoBlck; 
 
     std::cout << "Periodic Writer Handler - Heartbeat " << hb_seq_count << std::endl;
-    retcode = myPeriodicPublishThreadInfo->periodicData->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, hb_seq_count);
+    retcode = myPeriodicWriterThreadInfo->periodicData->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, hb_seq_count);
     hb_seq_count++; // increment seq_count here so 1) it starts at 0 as prescribed by TMS, 2) changes once per write of heartbeat
     if (retcode != DDS_RETCODE_OK) {
         std::cerr << "heartbeat: Dynamic Data Set Error" << std::endl << std::flush;

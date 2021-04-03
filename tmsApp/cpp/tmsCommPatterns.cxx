@@ -33,7 +33,6 @@ ReaderThreadInfo::ReaderThreadInfo(enum TOPICS_E topicEnum, bool echoResponse)
 
 bool    ReaderThreadInfo::echoReqResponse() { return echo_response; }
 
-std::string ReaderThreadInfo::me(){ return topic_name_array[myTopicEnum]; }
 enum TOPICS_E ReaderThreadInfo::topic_enum() { return myTopicEnum; };
 
 void*  pthreadToProcReaderEvents(void *reader_thread_info) {
@@ -50,7 +49,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
     DDS_UnsignedLong fingerprint_len = (DDS_UnsignedLong) tms_LEN_Fingerprint; // the get_octet_array requires this non-const
     DDS_DynamicData * request_response_data = NULL;
 
-    std::cout << "Created Reader Pthread: " << myReaderThreadInfo->me() << " Topic" << std::endl;
+    std::cout << "Created Reader Pthread: " << MY_READER_TOPIC_NAME << " Topic" << std::endl;
   
     // Create read condition
     read_condition = myReaderThreadInfo->reader->create_readcondition(
@@ -113,7 +112,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                 if (triggeredmask & DDS_SUBSCRIPTION_MATCHED_STATUS) {
                     DDS_SubscriptionMatchedStatus st;
                     myReaderThreadInfo->reader->get_subscription_matched_status(st);
-                    std::cout << myReaderThreadInfo->me() << "Reader Pubs: " 
+                    std::cout << MY_READER_TOPIC_NAME << "Reader Pubs: " 
                     << st.current_count << "  " << st.current_count_change << std::endl;
                 }
             } else if (active_conditions_seq[i] == read_condition) { 
@@ -134,7 +133,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 
                             // *******  Dispatch out to the topic handler ******** 
                             myReaderThreadInfo->dataSeq = &data_seq;
-                            // std::cout << "Recieved: " << myReaderThreadInfo->me() << std::endl; // announce oneself in handler
+                            // std::cout << "Recieved: " << MY_READER_TOPIC_NAME << std::endl; // announce oneself in handler
                             (*reader_handler_ptrs[myReaderThreadInfo->topic_enum()])((void *) myReaderThreadInfo ); // call handler
 
                             // Do we need to send an ReqResponse - they are generic for all requests so done here
@@ -224,7 +223,7 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
 	} // While (run_flag)
 
 	end_reader_thread: // reached by ^C or an error
-	std::cout << myReaderThreadInfo->me() << " Reader: Pthread Exiting" << std::endl;
+	std::cout << MY_READER_TOPIC_NAME << " Reader: Pthread Exiting" << std::endl;
 	exit(0);
 }
 
@@ -234,7 +233,6 @@ WriterEventsThreadInfo::WriterEventsThreadInfo(enum TOPICS_E topicEnum)
             myTopicEnum = topicEnum;
         }
 
-std::string WriterEventsThreadInfo::me(){ return topic_name_array[myTopicEnum]; }
 enum TOPICS_E WriterEventsThreadInfo::topic_enum() {return myTopicEnum; };
 
 
@@ -245,7 +243,7 @@ void*  pthreadToProcWriterEvents(void  * writerEventsThreadInfo) {
     DDS_ReturnCode_t retcode;
     DDSConditionSeq active_conditions_seq;
 
-    std::cout << "Created Writer Pthread: " << myWriterEventsThreadInfo->me() << " Topic" << std::endl;
+    std::cout << "Created Writer Pthread: " << MY_WRITER_TOPIC_NAME << " Topic" << std::endl;
 
     // Configure Waitset for Writer Status ****
     DDSStatusCondition *status_condition = myWriterEventsThreadInfo->writer->get_statuscondition();
@@ -294,21 +292,21 @@ void*  pthreadToProcWriterEvents(void  * writerEventsThreadInfo) {
                 if (triggeredmask & DDS_PUBLICATION_MATCHED_STATUS) {
 					DDS_PublicationMatchedStatus st;
                 	myWriterEventsThreadInfo->writer->get_publication_matched_status(st);
-					std::cout << myWriterEventsThreadInfo->me() << " Writer Subs: " 
+					std::cout << MY_WRITER_TOPIC_NAME << " Writer Subs: " 
                     << st.current_count << "  " << st.current_count_change << std::endl;
                 }
             } else {
                 // writers can only have status condition
-                std::cout << myWriterEventsThreadInfo->me() << " Writer: False Writer Event Trigger" << std::endl;
+                std::cout << MY_WRITER_TOPIC_NAME << " Writer: False Writer Event Trigger" << std::endl;
             }
         }
 	} // While (run_flag)
 	end_writer_thread: // reached by ^C or an error
-	std::cout << myWriterEventsThreadInfo->me() << " Writer: Pthread Exiting"<< std::endl;
+	std::cout << MY_WRITER_TOPIC_NAME << " Writer: Pthread Exiting"<< std::endl;
 	exit(0);
 }
 
-// PeriodicPublishThreadInfo member functions
+// PeriodicWriterThreadInfo member functions
 PeriodicWriterThreadInfo::PeriodicWriterThreadInfo (enum TOPICS_E topicEnum, DDS_Duration_t ratePeriod) 
         {
             enabled = false; //initialize disabled
@@ -319,19 +317,18 @@ PeriodicWriterThreadInfo::PeriodicWriterThreadInfo (enum TOPICS_E topicEnum, DDS
 DDS_Duration_t PeriodicWriterThreadInfo::pubRatePeriod() { return myRatePeriod; };
 enum TOPICS_E PeriodicWriterThreadInfo::topic_enum() {return myTopicEnum; };
 
-std::string PeriodicWriterThreadInfo::me(){ return topic_name_array[myTopicEnum]; }
 
 void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
-	PeriodicWriterThreadInfo * myPeriodicPublishThreadInfo;
-    myPeriodicPublishThreadInfo = (PeriodicWriterThreadInfo *) periodic_writer_thread_info;
+	PeriodicWriterThreadInfo * myPeriodicWriterThreadInfo;
+    myPeriodicWriterThreadInfo = (PeriodicWriterThreadInfo *) periodic_writer_thread_info;
 	DDSWaitSet * waitset = waitset = new DDSWaitSet();;
     DDS_ReturnCode_t retcode;
     DDSConditionSeq active_conditions_seq;
 
-    std::cout << "Created Periodic Publisher Pthread: " << myPeriodicPublishThreadInfo->me() << " Topic" << std::endl;
+    std::cout << "Created Periodic Writer Pthread: " << MY_PERIODIC_TOPIC_NAME << " Topic" << std::endl;
 
     // Configure Waitset for Writer Status ****
-    DDSStatusCondition *status_condition = myPeriodicPublishThreadInfo->writer->get_statuscondition();
+    DDSStatusCondition *status_condition = myPeriodicWriterThreadInfo->writer->get_statuscondition();
     if (status_condition == NULL) {
         std::cerr << "PeriodicWriter thread: get_statuscondition error" << std::endl;
         goto end_periodic_writer_thread;
@@ -355,17 +352,17 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
     // wait() blocks execution of the thread until one or more attached condition triggers  
 	// thread exits upon ^c or error
     while (run_flag) { 
-        retcode = waitset->wait(active_conditions_seq, myPeriodicPublishThreadInfo->pubRatePeriod());
+        retcode = waitset->wait(active_conditions_seq, myPeriodicWriterThreadInfo->pubRatePeriod());
         /* We get to timeout if no conditions were triggered */
         if (retcode == DDS_RETCODE_TIMEOUT) {
-            if (myPeriodicPublishThreadInfo->enabled) {
+            if (myPeriodicWriterThreadInfo->enabled) {
 
 
                 // *******  Dispatch out to the topic handler ******** s
-                // std::cout << "Sending Periodic Topic: " << myPeriodicPublishThreadInfo->me() << std::endl; // announce self in handler
-                (*periodic_handler_ptrs[myPeriodicPublishThreadInfo->topic_enum()])((void *) myPeriodicPublishThreadInfo); // call handler
+                // std::cout << "Sending Periodic Topic: " << MY_PERIODIC_TOPIC_NAME << std::endl; // announce self in handler
+                (*periodic_handler_ptrs[myPeriodicWriterThreadInfo->topic_enum()])((void *) myPeriodicWriterThreadInfo); // call handler
 
-                myPeriodicPublishThreadInfo->writer->write(* myPeriodicPublishThreadInfo->periodicData, DDS_HANDLE_NIL);
+                myPeriodicWriterThreadInfo->writer->write(* myPeriodicWriterThreadInfo->periodicData, DDS_HANDLE_NIL);
 
             }
 
@@ -383,26 +380,26 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
             /* Compare with Status Conditions */
             if (active_conditions_seq[i] == status_condition) {
                 DDS_StatusMask triggeredmask =
-                        myPeriodicPublishThreadInfo->writer->get_status_changes();
+                        myPeriodicWriterThreadInfo->writer->get_status_changes();
 
                 if (triggeredmask & DDS_PUBLICATION_MATCHED_STATUS) {
 					DDS_PublicationMatchedStatus st;
-                	myPeriodicPublishThreadInfo->writer->get_publication_matched_status(st);
-					std::cout << myPeriodicPublishThreadInfo->me() << " Writer Subs: " 
+                	myPeriodicWriterThreadInfo->writer->get_publication_matched_status(st);
+					std::cout << MY_PERIODIC_TOPIC_NAME << " Writer Subs: " 
                     << st.current_count << "  " << st.current_count_change << std::endl;
                 }
             } else {
                 // writers can only have status condition
-                std::cout << myPeriodicPublishThreadInfo->me() << " Writer: False Writer Event Trigger" << std::endl;
+                std::cout << MY_PERIODIC_TOPIC_NAME << " Writer: False Writer Event Trigger" << std::endl;
             }
         }
 	} // While (run_flag)
 	end_periodic_writer_thread: // reached by ^C or an error
-	std::cout << myPeriodicPublishThreadInfo->me() << " PeriodicWriter: Pthread Exiting"<< std::endl;
+	std::cout << MY_PERIODIC_TOPIC_NAME << " PeriodicWriter: Pthread Exiting"<< std::endl;
 	exit(0);
 }
 
-// On Change State PublishThreadInfo member functions
+// On Change State WriterThreadInfo member functions
 OnChangeWriterThreadInfo::OnChangeWriterThreadInfo (enum TOPICS_E topicEnum, DDSGuardCondition * guard_condition) 
         {
 
@@ -413,7 +410,6 @@ OnChangeWriterThreadInfo::OnChangeWriterThreadInfo (enum TOPICS_E topicEnum, DDS
 enum TOPICS_E OnChangeWriterThreadInfo::topic_enum() {return myTopicEnum; };
 DDSGuardCondition* OnChangeWriterThreadInfo::my_guard_condition() { return myGuardCondition; };
 
-std::string OnChangeWriterThreadInfo::me(){ return topic_name_array[myTopicEnum]; }
 
 void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
 	OnChangeWriterThreadInfo * myOnChangeWriterThreadInfo;
@@ -422,7 +418,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
     DDS_ReturnCode_t retcode;
     DDSConditionSeq active_conditions_seq;
 
-    std::cout << "Created On Change State Writer Pthread: " << myOnChangeWriterThreadInfo->me() << " Topic" << std::endl;
+    std::cout << "Created On Change State Writer Pthread: " << MY_ON_CHANGE_TOPIC_NAME << " Topic" << std::endl;
 
     // Configure Waitset for Writer Status ****
     DDSStatusCondition *status_condition = myOnChangeWriterThreadInfo->writer->get_statuscondition();
@@ -477,7 +473,7 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                 if (triggeredmask & DDS_PUBLICATION_MATCHED_STATUS) {
 					DDS_PublicationMatchedStatus st;
                 	myOnChangeWriterThreadInfo->writer->get_publication_matched_status(st);
-					std::cout << myOnChangeWriterThreadInfo->me() << " Writer Subs: " 
+					std::cout << MY_ON_CHANGE_TOPIC_NAME << " Writer Subs: " 
                     << st.current_count << "  " << st.current_count_change << std::endl;
                 }
             } else if (active_conditions_seq[i] == myOnChangeWriterThreadInfo->my_guard_condition()) {
@@ -485,12 +481,12 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
 
                     // IFF you need specific OnChange handling you can make a call from here
                     // You will also need to set up an array of OnChange handler pointers
-                    std::cout << "On Change write triggered: " << myOnChangeWriterThreadInfo->me() << std::endl;
+                    std::cout << "On Change write triggered: " << MY_ON_CHANGE_TOPIC_NAME << std::endl;
                     myOnChangeWriterThreadInfo->writer->write(* myOnChangeWriterThreadInfo->changeStateData, DDS_HANDLE_NIL);
                     // Need to set this false after processing - else it just retriggers immediately
                     retcode = myOnChangeWriterThreadInfo->my_guard_condition()->set_trigger_value(DDS_BOOLEAN_FALSE);
                     if (retcode != DDS_RETCODE_OK) {
-                        std::cerr << "On Change writer thread " << myOnChangeWriterThreadInfo->me()
+                        std::cerr << "On Change writer thread " << MY_ON_CHANGE_TOPIC_NAME
                         << ": set_enabled_guard error " << retcode << std::endl; 
                         goto end_on_change_thread;
                     }
@@ -498,13 +494,13 @@ void*  pthreadOnChangeWriter(void  * on_change_writer_thread_info) {
                 }
             } else {
                 // writers can only have status condition
-                std::cout << "On Change writer thread " << myOnChangeWriterThreadInfo->me() 
+                std::cout << "On Change writer thread " << MY_ON_CHANGE_TOPIC_NAME 
                 << " Writer: False Writer Event Trigger" << std::endl;
             }
         }
 	} // While (run_flag)
 	end_on_change_thread: // reached by ^C or an error
-	std::cout << myOnChangeWriterThreadInfo->me() << "On Change writer thread: Pthread Exiting"<< std::endl;
+	std::cout << MY_ON_CHANGE_TOPIC_NAME << "On Change writer thread: Pthread Exiting"<< std::endl;
 	exit(0);
 }
 
