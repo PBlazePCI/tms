@@ -155,7 +155,7 @@ void GenericDefaultPeriodicWriterHandler(void * infoBlck) {
 void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (void * infoBlck) {
     // To Do - can the cast be avoided i.e. pass in a  ReaderThreadInfo *  vs void *
     ReaderThreadInfo * myReaderThreadInfo = (ReaderThreadInfo *) infoBlck; 
-    std::cout << "Received " << MY_READER_TOPIC_NAME << " (should check for MM_JOIN/LEAVE) " << std::endl;
+    std::cout << "Receive Handler - Recieved " << MY_READER_TOPIC_NAME << " (should check for MM_JOIN/LEAVE) " << std::endl;
 
     // ****** PUT WHAT YOU NEED TO DO SPECIFICALLY FOR YOU TOPIC HERE
 
