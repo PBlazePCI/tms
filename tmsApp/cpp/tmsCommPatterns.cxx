@@ -200,7 +200,8 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                                 }
                                 myReaderThreadInfo->reqRspWriter->write(* request_response_data, DDS_HANDLE_NIL);
                                 if (retcode != DDS_RETCODE_OK) {
-                                    std::cerr << "Reader Thread: " << tms_TOPIC_REQUEST_RESPONSE_NAME << " write Error " << std::endl << std::flush;
+                                    std::cerr << "Reader Thread: " << topic_name_array[tms_TOPIC_REQUEST_RESPONSE_ENUM]
+                                        << " write Error " << std::endl << std::flush;
                                     goto end_reader_thread;
                                 }
 						
@@ -357,13 +358,11 @@ void*  pthreadPeriodicWriter(void  * periodic_writer_thread_info) {
         if (retcode == DDS_RETCODE_TIMEOUT) {
             if (myPeriodicWriterThreadInfo->enabled) {
 
-
                 // *******  Dispatch out to the topic handler ******** s
                 // std::cout << "Sending Periodic Topic: " << MY_PERIODIC_TOPIC_NAME << std::endl; // announce self in handler
                 (*periodic_handler_ptrs[myPeriodicWriterThreadInfo->topic_enum()])(myPeriodicWriterThreadInfo); // call handler
 
                 myPeriodicWriterThreadInfo->writer->write(* myPeriodicWriterThreadInfo->periodicData, DDS_HANDLE_NIL);
-
             }
 
             continue; // no need to process active conditions if timeout

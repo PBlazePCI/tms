@@ -22,8 +22,8 @@
 class ReaderThreadInfo;
 class PeriodicWriterThreadInfo;
 
-typedef void (*ReaderHandlerPtr)(ReaderThreadInfo *); // function pointer to a handler
-typedef void (*PeriodicWriterHandlerPtr)(PeriodicWriterThreadInfo *); // function pointer to a handler
+typedef void (*ReaderHandlerPtr)(ReaderThreadInfo *); // ptr to void ReaderFunc(ReaderThreadInfo *) 
+typedef void (*PeriodicWriterHandlerPtr)(PeriodicWriterThreadInfo *); 
 
 extern bool run_flag;
 
@@ -38,7 +38,7 @@ extern enum tms_MicrogridMembershipResult external_tms_membership_result;
 extern enum tms_SourceTransition internal_source_transition_state; 
 extern enum tms_SourceTransition external_tms_source_transition_state; 
 
-extern const char topic_name_array[tms_TOPIC_LAST_SENTINEL_ENUM][tms_MAXLEN_TopicName];
+extern const DDS_Char * const topic_name_array[];
 
 extern ReaderHandlerPtr reader_handler_ptrs[]; // list of Reader topic handlers
 extern PeriodicWriterHandlerPtr periodic_handler_ptrs[]; // list of Reader topic handlers
