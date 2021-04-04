@@ -242,7 +242,6 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     // DDSGuardCondition heartbeatStateChangeCondit;  // example of publishing a periodic as a change state.
     DDSGuardCondition microgridMembershipOutcomeCondit;
 
-    unsigned long long count = 0;  
     DDS_Duration_t send_period = {1,0};
 
     ReqCmdQ  req_cmd_q;
@@ -273,7 +272,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     std::cout << "Successfully Created Tactical Microgrid TMS Simulation Participant from the System Designer config file"
      << std::endl << std::flush;
 
-// Care must be taken to ensure the System Designer Writer/Reader Names match the names
+    // Care must be taken to ensure the System Designer Writer/Reader Names match the names
     // in the topic names defined in tmsTestExamples.h which was directly generated via 
     // rtiddscodegen from the official tms Model. 
     // Writers in the xml are "TMS Device Publisher1::<TopicName>Writer"
@@ -283,7 +282,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         writerName = "TMS MSM-Simulation Publisher1::";
         writerName.append(topic_name_array[myWritersIndx[i]]);
         writerName.append("Writer");
-        // get the writer and put it in myWriters[this_topic_enum]
+        // Lookup writer handles and put them in myWriters[this_topic_enum]
         myWriters[myWritersIndx[i]] = DDSDynamicDataWriter::narrow(
             participant->lookup_datawriter_by_name(writerName.c_str()));
         if (myWriters[myWritersIndx[i]] == NULL) {
@@ -299,7 +298,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         readerName = "TMS MSM-Simulation Subscriber1::";
         readerName.append(topic_name_array[myReadersIndx[i]]);
         readerName.append("Reader");
-        // get the writer and put it in myWriters[this_topic_enum]
+        // Lookup reader handles and put them in myReaders[this_topic_enum]
         myReaders[myReadersIndx[i]] = DDSDynamicDataReader::narrow(
             participant->lookup_datareader_by_name(readerName.c_str()));
         if (myReaders[myReadersIndx[i]] == NULL) {

@@ -248,7 +248,6 @@ extern "C" int tms_app_main(int sample_count) {
     // DDSGuardCondition heartbeatStateChangeCondit;  // example of publishing a periodic as a change state.
     DDSGuardCondition sourceTransitionStateChangeCondit;
 
-    unsigned long long count = 0;  
     DDS_Duration_t send_period = {1,0};
 
     ReqCmdQ  req_cmd_q;
@@ -291,7 +290,7 @@ extern "C" int tms_app_main(int sample_count) {
         writerName = "TMS Device Publisher1::";
         writerName.append(topic_name_array[myWritersIndx[i]]);
         writerName.append("Writer");
-        // get the writer and put it in myWriters[this_topic_enum]
+        // Lookup writer handles and put them in myWriters[this_topic_enum]
         myWriters[myWritersIndx[i]] = DDSDynamicDataWriter::narrow(
             participant->lookup_datawriter_by_name(writerName.c_str()));
         if (myWriters[myWritersIndx[i]] == NULL) {
@@ -303,11 +302,11 @@ extern "C" int tms_app_main(int sample_count) {
             << std::endl << std::flush;
     }
 
-   for (int i=0; i<mrIndx; i++) {
+    for (int i=0; i<mrIndx; i++) {
         readerName = "TMS Device Subscriber1::";
         readerName.append(topic_name_array[myReadersIndx[i]]);
         readerName.append("Reader");
-        // get the writer and put it in myWriters[this_topic_enum]
+        // Lookup reader handles and put them in myReaders[this_topic_enum]
         myReaders[myReadersIndx[i]] = DDSDynamicDataReader::narrow(
             participant->lookup_datareader_by_name(readerName.c_str()));
         if (myReaders[myReadersIndx[i]] == NULL) {
@@ -369,7 +368,6 @@ extern "C" int tms_app_main(int sample_count) {
     pthread_t whb_tid; // writer device_announcement tid
     pthread_create(&whb_tid, NULL, pthreadPeriodicWriter, (void*) myHeartbeatThreadInfo);
     
-    
     // myOnChangeWriterSourceTransitionStateThreadInfo->writer = source_transition_state_writer;
     myOnChangeWriterSourceTransitionStateThreadInfo->writer = myWriters[tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM];
     myOnChangeWriterSourceTransitionStateThreadInfo->enabled=true; // enable topic to be published
@@ -415,6 +413,7 @@ extern "C" int tms_app_main(int sample_count) {
     */
     std::cout <<  std::endl << tms_TOPIC_DEVICE_ANNOUNCEMENT << ": " << this_device_id << std::endl;
 
+    // Set static data in topics (fill dynamic data in the main_loop or handler) 
     product_info_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
     retcode = myWriters[tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM]->write(* product_info_data, DDS_HANDLE_NIL);
     if (retcode != DDS_RETCODE_OK) {
@@ -423,8 +422,7 @@ extern "C" int tms_app_main(int sample_count) {
     }
 
     retcode = heartbeat_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
-    retcode1 = heartbeat_data->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, count);
-    if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK ) {
+    if (retcode != DDS_RETCODE_OK) {
         std::cerr << "heartbeat: Dynamic Data Set Error" << std::endl << std::flush;
         goto tms_app_main_end;
     }
