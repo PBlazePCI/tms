@@ -381,7 +381,7 @@ extern "C" int tms_app_main(int sample_count) {
     */
     std::cout <<  std::endl << tms_TOPIC_DEVICE_ANNOUNCEMENT << ": " << this_device_id << std::endl;
 
-    // Set static data in topics (fill dynamic data in the main_loop or handler) 
+    // Pre-set static data in topics (fill dynamic data in the main_loop or handler) 
     myWriterDataInstances[tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM]->set_octet_array
         ("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
     retcode = myWriters[tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM]->write(* myWriterDataInstances[tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM], DDS_HANDLE_NIL);

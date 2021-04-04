@@ -201,6 +201,8 @@ static int participant_shutdown(
 
 extern "C" int tms_app_test_msm_main(int sample_count) {
     DDSDomainParticipant * participant = NULL;
+    DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3, retcode4;  // compound retcodes to do one check
+
 
     // array of writer enum TOPIC_E - enter the writers defined in 
     // System Designer XML file
@@ -226,11 +228,6 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     DDSDynamicDataReader * myReaders[tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
         NULL
     };
-
-    DDS_DynamicData * microgrid_membership_outcome_data = NULL;
-    DDS_DynamicData * source_transition_request_data = NULL;
-    DDS_DynamicData * request_response_data = NULL;
-    DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3, retcode4;  // compound retcodes to do one check
 
     DDS_DynamicData * myWriterDataInstances [tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
         NULL 
@@ -272,6 +269,8 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     std::cout << "Successfully Created Tactical Microgrid TMS Simulation Participant from the System Designer config file"
      << std::endl << std::flush;
 
+    // **** FIND DATA WRITERS AND READERS ****** CREATE DATA w/WRITERS
+    //
     // Care must be taken to ensure the System Designer Writer/Reader Names match the names
     // in the topic names defined in tmsTestExamples.h which was directly generated via 
     // rtiddscodegen from the official tms Model. 
@@ -292,6 +291,14 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         }
         std::cout << "Successfully Found: " << writerName 
             << std::endl << std::flush;
+        myWriterDataInstances[myWritersIndx[i]] = myWriters[myWritersIndx[i]]->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
+        if (myWriterDataInstances[myWritersIndx[i]]  == NULL) {
+            std::cerr << topic_name_array[myWritersIndx[i]] << ": create_data error"
+                << retcode << std::endl << std::flush;
+            goto tms_app_test_MSM_main_end;
+        } 
+        std::cout << "Successfully created Data for: " << topic_name_array[myWritersIndx[i]]
+            << std::endl << std::flush;  
     }
 
    for (int i=0; i<mrIndx; i++) {
@@ -308,27 +315,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         }
         std::cout << "Successfully Found: " << readerName 
             << std::endl << std::flush;
-    }
-
-    microgrid_membership_outcome_data = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
-    if (microgrid_membership_outcome_data == NULL) {
-        std::cerr << "microgrid_membership_outcome_data: create_data error"
-        << retcode << std::endl << std::flush;
-		goto tms_app_test_MSM_main_end;
     } 
-
-    std::cout << "Successfully created: microgrid_membership_outcome_data topic w/microgrid_membership_outcome writer" 
-    << std::endl << std::flush;  
-
-    source_transition_request_data = myWriters[tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM]->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
-    if (source_transition_request_data == NULL) {
-        std::cerr << "source_transition_request_data: create_data error"
-        << retcode << std::endl << std::flush;
-		goto tms_app_test_MSM_main_end;
-    } 
-
-    std::cout << "Successfully created: source_transition_request_data topic w/source_transition_request writer" 
-    << std::endl << std::flush;   
 
 	// Turn up threads - the Event threads do nothing but hang on events (no data)
     // Like to put the following in an itterator creating all the pthreads but the 
@@ -339,7 +326,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 
     myOnChangeMicrogridMembershipOutcomeThreadInfo->writer = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM];
     myOnChangeMicrogridMembershipOutcomeThreadInfo->enabled=true; // enable topic to be published
-    myOnChangeMicrogridMembershipOutcomeThreadInfo->changeStateData=microgrid_membership_outcome_data; 
+    myOnChangeMicrogridMembershipOutcomeThreadInfo->changeStateData=myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]; 
     pthread_t wmmo_tid; // writer microgrid membership outcome tid
     pthread_create(&wmmo_tid, NULL, pthreadOnChangeWriter, (void*) myOnChangeMicrogridMembershipOutcomeThreadInfo);
 
@@ -365,14 +352,18 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 
     // Preconfigure outcome topic (MicrogridMembershipApproval), in a real MSM you'd keep a database (array) of requesting devices and state
     // Putting the MSM id in the requestId and the approved device relatedRequestId in the deviceId
-    retcode = microgrid_membership_outcome_data->set_octet_array("requestId.deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
-    retcode1 = microgrid_membership_outcome_data->\
+    retcode = myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->set_octet_array
+        ("requestId.deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
+    retcode1 = myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->\
         set_ulonglong("requestId.sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_UnsignedLongLong)\
         reqSeqNo->getNextSeqNo(tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM)); 
-    retcode2 = microgrid_membership_outcome_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
+    retcode2 = myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->set_octet_array
+        ("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
     // note enums are compiler dependent and here seem to be 4 bytes long (the compiler will tell you- and you can always printf sizeof(MMR_COMPLETE))
-    retcode3 = microgrid_membership_outcome_data->set_long("membership", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MM_JOIN);
-    retcode4 = microgrid_membership_outcome_data->set_long("result", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MMR_COMPLETE);
+    retcode3 = myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->set_long
+        ("membership", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MM_JOIN);
+    retcode4 = myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->set_long
+        ("result", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, (DDS_Long) MMR_COMPLETE);
     if (retcode != DDS_RETCODE_OK || retcode1 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK || retcode2 != DDS_RETCODE_OK) {
         std::cerr << "microgrid_membership_outcome: Dynamic Data Set Error" << std::endl << std::flush;
         goto tms_app_test_MSM_main_end;
