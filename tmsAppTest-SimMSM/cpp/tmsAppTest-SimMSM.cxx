@@ -232,7 +232,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     DDS_DynamicData * request_response_data = NULL;
     DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3, retcode4;  // compound retcodes to do one check
 
-    DDS_DynamicData * myWriterDataInstances [sizeof(myWritersIndx)] = {
+    DDS_DynamicData * myWriterDataInstances [tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
         NULL 
     };
 
