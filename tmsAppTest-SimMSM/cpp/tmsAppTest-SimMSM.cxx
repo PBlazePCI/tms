@@ -37,8 +37,6 @@ enum tms_MicrogridMembershipResult external_tms_membership_result = MMR_UNINITIA
 enum tms_SourceTransition internal_source_transition_state = ST_UNINITIALIZED; 
 enum tms_SourceTransition external_tms_source_transition_state = ST_UNINITIALIZED; 
 
-// To Do - make this an array of pointers to static const DDS_Char * const and deprecate
-// the #define .
 const DDS_Char * const topic_name_array [] = {
     tms_TOPIC_ACTIVE_DIAGNOSTICS,
     tms_TOPIC_AUTHORIZATION_TO_ENERGIZE_OUTCOME,
