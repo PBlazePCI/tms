@@ -9,7 +9,6 @@
 * any incidental or consequential damages arising out of the use or inability
 * to use the software.
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -28,7 +27,6 @@ bool run_flag = true;
 
 // should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
 unsigned long long sequence_number=0; // ever monotonically increasing for each request sent
-
 
 // Variable associated with Source Transition Request - note the TMS topic struct holds both present and future state
 // so we should be able to leverage the state within the topic
@@ -111,7 +109,6 @@ void handle_SIGINT(int unused)
   // On CTRL+C - abort! //
   run_flag = false;
 }
-
 
 // class RequestSequenceNumber member function definitions (see class def in tmsTestExampleApp.h)
 // Used to manage the static sequence_number across all requests
@@ -226,7 +223,7 @@ extern "C" int tms_app_main(int sample_count) {
     TOPICS_E myReadersIndx [] = {
         tms_TOPIC_REQUEST_RESPONSE_ENUM,
         tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM,
-        tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM,
+        tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM
     };
     size_t mrIndx = sizeof(myReadersIndx) / sizeof(TOPICS_E); // actual number of writers
 
@@ -294,7 +291,6 @@ extern "C" int tms_app_main(int sample_count) {
         writerName = "TMS Device Publisher1::";
         writerName.append(topic_name_array[myWritersIndx[i]]);
         writerName.append("Writer");
-        // std::cout << " *** Looking for *** " << i << " "  << writerName << std::endl;
         // get the writer and put it in myWriters[this_topic_enum]
         myWriters[myWritersIndx[i]] = DDSDynamicDataWriter::narrow(
             participant->lookup_datawriter_by_name(writerName.c_str()));
@@ -311,7 +307,6 @@ extern "C" int tms_app_main(int sample_count) {
         readerName = "TMS Device Subscriber1::";
         readerName.append(topic_name_array[myReadersIndx[i]]);
         readerName.append("Reader");
-        // std::cout << " *** Looking for *** " << i << " "  << writerName << std::endl;
         // get the writer and put it in myWriters[this_topic_enum]
         myReaders[myReadersIndx[i]] = DDSDynamicDataReader::narrow(
             participant->lookup_datareader_by_name(readerName.c_str()));
@@ -397,7 +392,6 @@ extern "C" int tms_app_main(int sample_count) {
     pthread_t wrr_tid; // Wroter Request Response tid
     pthread_create(&wrr_tid, NULL, pthreadToProcWriterEvents, (void*) myRequestResponseEventThreadInfo);
 
-
     // myMicrogridMembershipOutcomeReaderThreadInfo->reader = microgrid_membership_outcome_reader;
     myMicrogridMembershipOutcomeReaderThreadInfo->reader = myReaders[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM];
     pthread_t rmmo_tid; // Reader microgrid_membership_outcome tid
@@ -414,15 +408,12 @@ extern "C" int tms_app_main(int sample_count) {
     pthread_t rrr_tid; // Reader Request Response tid - a regular pirate rrr
     pthread_create(&rrr_tid, NULL, pthreadToProcReaderEvents, (void*) myRequestResponseReaderThreadInfo);
 
- 
     NDDSUtility::sleep(send_period); // wait a second for thread initialization to complete printing (printing is not sychronized)
-
 
     /* Publish one-time topics here - QoS is likely keep last, with durability set to transient-local to allow late joiners
        to get these announcements
     */
     std::cout <<  std::endl << tms_TOPIC_DEVICE_ANNOUNCEMENT << ": " << this_device_id << std::endl;
-
 
     product_info_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
     retcode = myWriters[tms_TOPIC_DEVICE_ANNOUNCEMENT_ENUM]->write(* product_info_data, DDS_HANDLE_NIL);
@@ -430,7 +421,6 @@ extern "C" int tms_app_main(int sample_count) {
         std::cerr << "product_info: Dynamic Data Set Error " << std::endl << std::flush;
         goto tms_app_main_end;
     }
-
 
     retcode = heartbeat_data->set_octet_array("deviceId", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, tms_LEN_Fingerprint, (const DDS_Octet *)&this_device_id); 
     retcode1 = heartbeat_data->set_ulong("sequenceNumber", DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED, count);

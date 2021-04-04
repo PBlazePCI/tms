@@ -201,18 +201,44 @@ static int participant_shutdown(
 
 extern "C" int tms_app_test_msm_main(int sample_count) {
     DDSDomainParticipant * participant = NULL;
-    DDSDynamicDataReader * request_response_reader = NULL;
-    DDSDynamicDataReader * source_transition_state_reader = NULL;
-	DDSDynamicDataReader * microgrid_membership_request_reader = NULL;
-	DDSDynamicDataWriter * microgrid_membership_outcome_writer = NULL;
-    DDSDynamicDataWriter * request_response_writer = NULL;
-    DDSDynamicDataWriter * source_transition_request_writer = NULL;
+
+    // array of writer enum TOPIC_E - enter the writers defined in 
+    // System Designer XML file
+    TOPICS_E myWritersIndx [] = {
+        tms_TOPIC_REQUEST_RESPONSE_ENUM,
+        tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM,
+        tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM
+    }; 
+    size_t mwIndx = sizeof(myWritersIndx) / sizeof(TOPICS_E); // actual number of writers
+
+    DDSDynamicDataWriter * myWriters[tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
+        NULL
+    };
+
+    // array of Reader handles by enum TOPIC_E 
+    TOPICS_E myReadersIndx [] = {
+        tms_TOPIC_REQUEST_RESPONSE_ENUM,
+        tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM,
+        tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM
+    };
+    size_t mrIndx = sizeof(myReadersIndx) / sizeof(TOPICS_E); // actual number of writers
+
+    DDSDynamicDataReader * myReaders[tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
+        NULL
+    };
+
     DDS_DynamicData * microgrid_membership_outcome_data = NULL;
     DDS_DynamicData * source_transition_request_data = NULL;
     DDS_DynamicData * request_response_data = NULL;
     DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3, retcode4;  // compound retcodes to do one check
 
-     
+    DDS_DynamicData * myWriterDataInstances [sizeof(myWritersIndx)] = {
+        NULL 
+    };
+
+    std::string writerName;
+    std::string readerName;
+
     // DDSGuardCondition heartbeatStateChangeCondit;  // example of publishing a periodic as a change state.
     DDSGuardCondition microgridMembershipOutcomeCondit;
 
@@ -247,75 +273,45 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     std::cout << "Successfully Created Tactical Microgrid TMS Simulation Participant from the System Designer config file"
      << std::endl << std::flush;
 
-
-    // To Do: create an array of writers w/data handles indexed by enum topic
-    // and itterate getting writer handles - same with reader handles 
-    microgrid_membership_outcome_writer = DDSDynamicDataWriter::narrow(
-		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-        participant->lookup_datawriter_by_name("TMS MSM-Simulation Publisher1::MicrogridMembershipOutcomeWriter"));
-    if (microgrid_membership_outcome_writer  == NULL) {
-        std::cerr << "TMS MSM-Simulation Publisher1::MicrogridMembershipOutcomeWriter lookup_datawriter_by_name error " 
-        << retcode << std::endl << std::flush; 
-		goto tms_app_test_MSM_main_end;
+// Care must be taken to ensure the System Designer Writer/Reader Names match the names
+    // in the topic names defined in tmsTestExamples.h which was directly generated via 
+    // rtiddscodegen from the official tms Model. 
+    // Writers in the xml are "TMS Device Publisher1::<TopicName>Writer"
+    // Readers in the xml are "TMS Device Subscriber1::<TopicName>Reader"
+    // If the loop throws an error likey these did not match as expected
+    for (int i=0; i<mwIndx; i++) {
+        writerName = "TMS MSM-Simulation Publisher1::";
+        writerName.append(topic_name_array[myWritersIndx[i]]);
+        writerName.append("Writer");
+        // get the writer and put it in myWriters[this_topic_enum]
+        myWriters[myWritersIndx[i]] = DDSDynamicDataWriter::narrow(
+            participant->lookup_datawriter_by_name(writerName.c_str()));
+        if (myWriters[myWritersIndx[i]] == NULL) {
+            std::cerr << writerName << ": lookup_datawriter_by_name error "
+                << retcode << std::endl << std::flush; 
+		    goto tms_app_test_MSM_main_end;
+        }
+        std::cout << "Successfully Found: " << writerName 
+            << std::endl << std::flush;
     }
-    std::cout << "Successfully Found: TMS MSM-Simulation Publisher1::MicrogridMembershipOutcomeWriter" 
-    << std::endl << std::flush;
 
-    source_transition_request_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS MSM-Simulation Publisher1::SourceTransitionRequestWriter"));
-    if (source_transition_request_writer  == NULL) {
-        std::cerr << "TMS MSM-Simulation Publisher1::SourceTransitionRequestWriter: lookup_datawriter_by_name error "
-        << retcode << std::endl << std::flush; 
-		goto tms_app_test_MSM_main_end;
+   for (int i=0; i<mrIndx; i++) {
+        readerName = "TMS MSM-Simulation Subscriber1::";
+        readerName.append(topic_name_array[myReadersIndx[i]]);
+        readerName.append("Reader");
+        // get the writer and put it in myWriters[this_topic_enum]
+        myReaders[myReadersIndx[i]] = DDSDynamicDataReader::narrow(
+            participant->lookup_datareader_by_name(readerName.c_str()));
+        if (myReaders[myReadersIndx[i]] == NULL) {
+            std::cerr << readerName << ": lookup_datawreader_by_name error "
+                << retcode << std::endl << std::flush; 
+		    goto tms_app_test_MSM_main_end;
+        }
+        std::cout << "Successfully Found: " << readerName 
+            << std::endl << std::flush;
     }
-    std::cout << "Successfully Found: TMS MSM-Simulation Publisher1::SourceTransitionRequestWriter" 
-    << std::endl << std::flush;
 
-    request_response_writer = DDSDynamicDataWriter::narrow(
-        participant->lookup_datawriter_by_name("TMS MSM-Simulation Publisher1::RequestResponseWriter"));
-    if (request_response_writer   == NULL) {
-        std::cerr << "TMS MSM-Simulation Publisher1::RequestResponseWriter: lookup_datawriter_by_name error "
-        << retcode << std::endl << std::flush; 
-		goto tms_app_test_MSM_main_end;
-    }
-    std::cout << "Successfully Found: TMS MSM-Simulation Publisher1::RequestResponseWriter" 
-    << std::endl << std::flush;
-
- 	microgrid_membership_request_reader = DDSDynamicDataReader::narrow(
-		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS MSM-Simulation Subscriber1::MicrogridMembershipRequestReader")); 
-    if (microgrid_membership_request_reader == NULL) {
-        std::cerr << "TMS MSM-Simulation Subscriber1::MicrogridMembershipRequestReader"
-        << retcode << std::endl << std::flush;
-		goto tms_app_test_MSM_main_end;
-    } 
-    std::cout << "Successfully Found: TMS MSM-Simulation Subscriber1::MicrogridMembershipRequestReader" 
-    << std::endl << std::flush;   
-
-    request_response_reader = DDSDynamicDataReader::narrow(
-		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS MSM-Simulation Subscriber1::RequestResponseReader")); 
-    if (request_response_reader == NULL) {
-        std::cerr << "TMS MSM-Simulation Subscriber1::RequestResponseReader"
-        << retcode << std::endl << std::flush;
-		goto tms_app_test_MSM_main_end;
-    } 
-    std::cout << "Successfully Found: TMS MSM-Simulation Subscriber1::RequestResponseReader" 
-    << std::endl << std::flush; 
-
-    source_transition_state_reader = DDSDynamicDataReader::narrow(
-		// Defined only in domain_participant_library. PUblisher name not defined QoS file
-		participant->lookup_datareader_by_name("TMS MSM-Simulation Subscriber1::SourceTransitionStateReader")); 
-    if (source_transition_state_reader == NULL) {
-        std::cerr << "TMS MSM-Simulation Subscriber1::SourceTransitionStateReader"
-        << retcode << std::endl << std::flush;
-		goto tms_app_test_MSM_main_end;
-    } 
-    std::cout << "Successfully Found: TMS MSM-Simulation Subscriber1::SourceTransitionStateReader" 
-    << std::endl << std::flush; 
-
-
-    microgrid_membership_outcome_data = microgrid_membership_outcome_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
+    microgrid_membership_outcome_data = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM]->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
     if (microgrid_membership_outcome_data == NULL) {
         std::cerr << "microgrid_membership_outcome_data: create_data error"
         << retcode << std::endl << std::flush;
@@ -325,7 +321,7 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     std::cout << "Successfully created: microgrid_membership_outcome_data topic w/microgrid_membership_outcome writer" 
     << std::endl << std::flush;  
 
-    source_transition_request_data = source_transition_request_writer->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
+    source_transition_request_data = myWriters[tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM]->create_data(DDS_DYNAMIC_DATA_PROPERTY_DEFAULT);
     if (source_transition_request_data == NULL) {
         std::cerr << "source_transition_request_data: create_data error"
         << retcode << std::endl << std::flush;
@@ -338,37 +334,35 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
 	// Turn up threads - the Event threads do nothing but hang on events (no data)
     // Like to put the following in an itterator creating all the pthreads but the 
     // topicThreadInfo's are somewhat different depending upon the communications pattern
-    myRequestResponseEventThreadInfo->writer = request_response_writer;
+    myRequestResponseEventThreadInfo->writer = myWriters[tms_TOPIC_REQUEST_RESPONSE_ENUM];
     pthread_t wrr_tid; // Wroter Request Response tid
     pthread_create(&wrr_tid, NULL, pthreadToProcWriterEvents, (void*) myRequestResponseEventThreadInfo);
 
-    myOnChangeMicrogridMembershipOutcomeThreadInfo->writer = microgrid_membership_outcome_writer;
+    myOnChangeMicrogridMembershipOutcomeThreadInfo->writer = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM];
     myOnChangeMicrogridMembershipOutcomeThreadInfo->enabled=true; // enable topic to be published
     myOnChangeMicrogridMembershipOutcomeThreadInfo->changeStateData=microgrid_membership_outcome_data; 
     pthread_t wmmo_tid; // writer microgrid membership outcome tid
     pthread_create(&wmmo_tid, NULL, pthreadOnChangeWriter, (void*) myOnChangeMicrogridMembershipOutcomeThreadInfo);
 
-    mySourceTransitionRequestEventThreadInfo->writer = source_transition_request_writer;
+    mySourceTransitionRequestEventThreadInfo->writer = myWriters[tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM];
     pthread_t wstr_tid; // writer source transiton request tid
     pthread_create(&wstr_tid, NULL, pthreadToProcWriterEvents, (void*) mySourceTransitionRequestEventThreadInfo);
 
-    myMicrogridMembershipRequestReaderThreadInfo->reader = microgrid_membership_request_reader;
+    myMicrogridMembershipRequestReaderThreadInfo->reader = myReaders[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM];
     // this topic when received, requires a RequestResponse - so pass in the writer.
-    myMicrogridMembershipRequestReaderThreadInfo->reqRspWriter = request_response_writer;
+    myMicrogridMembershipRequestReaderThreadInfo->reqRspWriter = myWriters[tms_TOPIC_REQUEST_RESPONSE_ENUM];
     pthread_t rmmo_tid; // Reader microgrid_membership_outcome tid
     pthread_create(&rmmo_tid, NULL, pthreadToProcReaderEvents, (void*) myMicrogridMembershipRequestReaderThreadInfo);
 
-    mySourceTransitionStateReaderThreadInfo->reader = source_transition_state_reader;
+    mySourceTransitionStateReaderThreadInfo->reader = myReaders[tms_TOPIC_SOURCE_TRANSITION_STATE_ENUM];
     pthread_t rsts_tid; // Reader Source Transition state tid
     pthread_create(&rsts_tid, NULL, pthreadToProcReaderEvents, (void*) mySourceTransitionStateReaderThreadInfo);
 
-    myRequestResponseReaderThreadInfo->reader = request_response_reader;
+    myRequestResponseReaderThreadInfo->reader = myReaders[tms_TOPIC_REQUEST_RESPONSE_ENUM];
     pthread_t rrr_tid; // Reader Request Response tid - a regular pirate rrr
     pthread_create(&rrr_tid, NULL, pthreadToProcReaderEvents, (void*) myRequestResponseReaderThreadInfo);
 
-
     NDDSUtility::sleep(send_period); // wait a second for thread initialization to complete printing (printing is not sychronized)
-
 
     // Preconfigure outcome topic (MicrogridMembershipApproval), in a real MSM you'd keep a database (array) of requesting devices and state
     // Putting the MSM id in the requestId and the approved device relatedRequestId in the deviceId
@@ -386,7 +380,6 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     }
  
     NDDSUtility::sleep(send_period); // Optional - to let periodic writer go first
-
 
     /* Main loop */
     while (run_flag) {
@@ -407,7 +400,6 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
         }
 
         NDDSUtility::sleep(send_period);  // remove eventually 
-
     }
 
     tms_app_test_MSM_main_end:
