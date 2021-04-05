@@ -220,7 +220,7 @@ extern "C" int tms_app_main(int sample_count) {
         NULL
     };
     // Array of Writer Data Instance (To Do - combine to one struct)
-    DDS_DynamicData * myWriterDataInstances[tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
+    DDS_DynamicData * myWriterDataInstances[tms_TOPIC_LAST_SENTINEL_ENUM] = { 
         NULL 
     };
 
@@ -230,7 +230,7 @@ extern "C" int tms_app_main(int sample_count) {
         tms_TOPIC_SOURCE_TRANSITION_REQUEST_ENUM,
         tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME_ENUM
     };
-    size_t mrIndx = sizeof(myReadersIndx) / sizeof(TOPICS_E); // actual number of writers
+    size_t mrIndx = sizeof(myReadersIndx) / sizeof(TOPICS_E); // actual number of readers
 
     // Array of Reader Handles - filled out by our Lookup loop below
     DDSDynamicDataReader * myReaders[tms_TOPIC_LAST_SENTINEL_ENUM] = { // Maximum # writers possible
@@ -414,13 +414,6 @@ extern "C" int tms_app_main(int sample_count) {
     }
     NDDSUtility::sleep(send_period); // Optional - to let periodic writer go first
 
-    // get approval to enter the grid
-    retcode = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM]->write
-        (* myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM], DDS_HANDLE_NIL);
-    if (retcode != DDS_RETCODE_OK) {
-        std::cerr << "product_info: Dynamic Data Set Error " << std::endl << std::flush;
-        goto tms_app_main_end;
-    }
 
     // Upon approval enable all Periodic and Change State Topics
     myHeartbeatThreadInfo->enabled=true;  
@@ -431,6 +424,15 @@ extern "C" int tms_app_main(int sample_count) {
         std::cout << ". "; // background idle
         // Do your stuff here to interact CAN to DDS (i.e. get devices state and
         // load DDS topics, set change triggers etc.)
+        if (internal_membership_result != MMR_COMPLETE) {
+            // get approval to enter the grid - according to TMS spec Command Profile = "As needed"
+            retcode = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM]->write
+                (* myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM], DDS_HANDLE_NIL);
+            if (retcode != DDS_RETCODE_OK) {
+                std::cerr << "Micrgrid Membership Request: Write Error " << std::endl << std::flush;
+                goto tms_app_main_end;
+            }
+        }
     
         NDDSUtility::sleep(send_period);  // remove eventually 
     }

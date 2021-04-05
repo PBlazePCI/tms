@@ -203,7 +203,6 @@ extern "C" int tms_app_test_msm_main(int sample_count) {
     DDSDomainParticipant * participant = NULL;
     DDS_ReturnCode_t retcode, retcode1, retcode2, retcode3, retcode4;  // compound retcodes to do one check
 
-
     // array of writer enum TOPIC_E - enter the writers defined in 
     // System Designer XML file
     TOPICS_E myWritersIndx [] = {

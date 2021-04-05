@@ -170,6 +170,7 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (ReaderThreadInfo * my
 
 void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (ReaderThreadInfo * myReaderThreadInfo) {
     std::cout << "Receive Handler - Received " << MY_READER_TOPIC_NAME << std::endl;
+    internal_membership_result = MMR_COMPLETE;
 }
 
 void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_OUTCOME (ReaderThreadInfo * myReaderThreadInfo) {
