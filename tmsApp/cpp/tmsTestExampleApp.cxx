@@ -93,7 +93,7 @@ const DDS_Char * const topic_name_array [] = {
 // Should probably intialize this_device_id in a loop since setting an array size tms_LEN_Fingerprint
 // to a "fixed string 32 chars + null" defeats the purpose of using tms_LEN_Fingerprint - but eventually
 // it would be populated via a CAN device ID access 
-static char this_device_id [tms_LEN_Fingerprint+1] = "00000000000000000000000000001234";  
+char this_device_id [tms_LEN_Fingerprint+1] = "00000000000000000000000000001234";  
 
 // Local prototypes
 void handle_SIGINT(int unused);
@@ -424,14 +424,14 @@ extern "C" int tms_app_main(int sample_count) {
         std::cout << ". "; // background idle
         // Do your stuff here to interact CAN to DDS (i.e. get devices state and
         // load DDS topics, set change triggers etc.)
-        if (internal_membership_result != MMR_COMPLETE) {
+        //if (internal_membership_result != MMR_COMPLETE) {
             // get approval to enter the grid - according to TMS spec Command Profile = "As needed"
             retcode = myWriters[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM]->write
                 (* myWriterDataInstances[tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST_ENUM], DDS_HANDLE_NIL);
             if (retcode != DDS_RETCODE_OK) {
                 std::cerr << "Micrgrid Membership Request: Write Error " << std::endl << std::flush;
                 goto tms_app_main_end;
-            }
+        //   }
         }
     
         NDDSUtility::sleep(send_period);  // remove eventually 

@@ -132,7 +132,8 @@ void*  pthreadToProcReaderEvents(void *reader_thread_info) {
                             if (retcode != DDS_RETCODE_OK) goto end_reader_thread;
 
                             // *******  Dispatch out to the topic handler ******** 
-                            myReaderThreadInfo->dataSeq = &data_seq;
+                            myReaderThreadInfo->dataSeqInstance = &data_seq[i];
+                            //myReaderThreadInfo->dataSeqIndx = i;
                             // std::cout << "Recieved: " << MY_READER_TOPIC_NAME << std::endl; // announce oneself in handler
                             (*reader_handler_ptrs[myReaderThreadInfo->topic_enum()])(myReaderThreadInfo); // call handler
 

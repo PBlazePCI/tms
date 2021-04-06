@@ -90,7 +90,7 @@ const DDS_Char * const topic_name_array [] = {
     tms_TOPIC_STORAGE_INFO,
     tms_TOPIC_STORAGE_STATE
 };
-static char this_device_id [tms_LEN_Fingerprint+1] = "10000000100000001000000010000000";
+char this_device_id [tms_LEN_Fingerprint+1] = "10000000100000001000000010000000";
 
 // Local prototypes
 void handle_SIGINT(int unused);

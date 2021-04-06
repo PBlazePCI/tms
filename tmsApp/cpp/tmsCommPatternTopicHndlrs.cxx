@@ -168,8 +168,34 @@ void ReaderHandler_tms_TOPIC_MICROGRID_MEMBERSHIP_REQUEST (ReaderThreadInfo * my
    return;
 }
 
+bool isThisMyDeviceId (tms_Fingerprint fingerprint) {
+    bool result = true;
+    for (int i=0; i<tms_LEN_Fingerprint; i++){
+        if (fingerprint[i] != this_device_id[i])
+            result = false;
+            break;
+    }
+    return result;
+}
+
 void ReaderHandler_tms_TOPIC_REQUEST_RESPONSE (ReaderThreadInfo * myReaderThreadInfo) {
-    std::cout << "Receive Handler - Received " << MY_READER_TOPIC_NAME << std::endl;
+    DDS_UnsignedLong fingerprint_len = (DDS_UnsignedLong) tms_LEN_Fingerprint;
+    tms_SampleId tms_sample_id; // use microgrid def from model tmsTestExample.h
+    DDS_ReturnCode_t  retcode;
+
+    std::cout << "Receive Handler - Received " << MY_READER_TOPIC_NAME;
+    // See if anyone is getting Responses not directed to them
+    retcode = myReaderThreadInfo->dataSeqInstance->get_octet_array(
+                                    tms_sample_id.deviceId,
+                                    &fingerprint_len,
+                                    "relatedRequestId.deviceId",
+                                    DDS_DYNAMIC_DATA_MEMBER_ID_UNSPECIFIED
+                                    );
+    if (isThisMyDeviceId(tms_sample_id.deviceId))
+        std::cout << " for Me. " <<  std::endl;
+    else
+        std::cout << " some other device." << std::endl;
+    
     internal_membership_result = MMR_COMPLETE;
 }
 

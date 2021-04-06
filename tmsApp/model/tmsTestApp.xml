@@ -1031,7 +1031,8 @@
         </publisher>
         <subscriber name="TMS MSM-Simulation Subscriber1">
           <data_reader name="MicrogridMembershipRequestReader" topic_ref="MicrogridMembershipRequest"/>
-          <data_reader name="RequestResponseReader" topic_ref="RequestResponse"/>
+          <data_reader name="RequestResponseReader" topic_ref="RequestResponse">
+          </data_reader>
           <data_reader name="SourceTransitionStateReader" topic_ref="SourceTransitionState"/>
         </subscriber>
       </domain_participant>

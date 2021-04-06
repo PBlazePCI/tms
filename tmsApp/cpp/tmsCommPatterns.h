@@ -27,6 +27,8 @@ typedef void (*PeriodicWriterHandlerPtr)(PeriodicWriterThreadInfo *);
 
 extern bool run_flag;
 
+extern char this_device_id[]; // this_device is defined in the main app file (for each device/app instance)
+
 // should tuck this var into the RequestSequenceNumber class and make that Class a singlton pattern
 extern unsigned long long sequence_number; // ever monotonically increasing for each request sent
 
@@ -71,7 +73,8 @@ class ReaderThreadInfo {
 
         // if echoResponse set true this writer will be used to echo the response
         DDSDynamicDataWriter * reqRspWriter;
-        DDS_DynamicDataSeq * dataSeq; // pass in dataSeq for handler to process
+        DDS_DynamicData * dataSeqInstance; // pass in dataSeq for handler to process
+        // int dataSeqIndx;
         DDS_UnsignedLong tms_REPLY_code;
         char reason[tms_MAXLEN_reason];
 

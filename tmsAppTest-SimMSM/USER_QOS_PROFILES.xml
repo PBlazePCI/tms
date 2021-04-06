@@ -1005,7 +1005,13 @@
     <domain_participant_library name="TMS_ParticipantLibrary1">
       <domain_participant name="TMS Device Participant1" domain_ref="TMS_DomainLibrary1::TMS_Domain0">
         <publisher name="TMS Device Publisher1">
-          <data_writer name="DeviceAnnouncementWriter" topic_ref="DeviceAnnouncement"/>
+          <data_writer name="DeviceAnnouncementWriter" topic_ref="DeviceAnnouncement">
+            <datawriter_qos>
+              <durability>
+                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+              </durability>
+            </datawriter_qos>
+          </data_writer>
           <data_writer name="MicrogridMembershipRequestWriter" topic_ref="MicrogridMembershipRequest"/>
           <data_writer name="HeartbeatWriter" topic_ref="Heartbeat"/>
           <data_writer name="RequestResponseWriter" topic_ref="RequestResponse"/>
@@ -1025,7 +1031,8 @@
         </publisher>
         <subscriber name="TMS MSM-Simulation Subscriber1">
           <data_reader name="MicrogridMembershipRequestReader" topic_ref="MicrogridMembershipRequest"/>
-          <data_reader name="RequestResponseReader" topic_ref="RequestResponse"/>
+          <data_reader name="RequestResponseReader" topic_ref="RequestResponse">
+          </data_reader>
           <data_reader name="SourceTransitionStateReader" topic_ref="SourceTransitionState"/>
         </subscriber>
       </domain_participant>
